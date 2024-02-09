@@ -17,7 +17,7 @@ import re
 import sys
 from difflib import Differ
 
-workspace_dir = os.path.join(".", "files")
+workspace_dir = os.path.join(".", "local_files")
 picture_table_file_old = sys.argv[1]
 picture_table_file_new = sys.argv[2]
 range_dict = {"0": "自身", "1": "自身", "2": "己方全体", "3": "敌方单体", "4": "敌方全体"}

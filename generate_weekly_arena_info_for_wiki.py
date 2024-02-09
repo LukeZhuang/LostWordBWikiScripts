@@ -12,7 +12,7 @@ import csv
 import os
 import sys
 
-f = open(os.path.join("./files", "weekly_arena_output.txt"), "w")
+f = open(os.path.join("./local_files", "weekly_arena_output.txt"), "w")
 arena_enemie_dict = {}
 units = {}
 resists = {}
