@@ -426,14 +426,12 @@ if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
 
-output_json_datas = []
 output_json_data = {}
 chapter_pages: dict[int, set[int]] = {}
 section_pages: dict[int, set[int]] = {}
 catagory_pages: dict[str, set[int]] = {}
 episode_page_name: dict[int, tuple[str, str, str]] = {}
 used_image_set: set[str] = set()
-cnt = 0
 for json_file_name in sorted(os.listdir(dir_to_jsons)):
     episode_name = os.path.splitext(json_file_name)[0]
     output_file_name = os.path.join(output_dir, episode_name + ".txt")
@@ -495,11 +493,6 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
     assert page_name not in output_json_data
     output_json_data[page_name] = cur_json_data
     episode_page_name[episode_id] = (title, subtitle, page_name)
-    cnt += 1
-    if cnt % 500 == 0:
-        output_json_datas.append(output_json_data)
-        output_json_data = {}
-output_json_datas.append(output_json_data)
 
 
 # -------------------- hard coded episodes-------------------
@@ -520,7 +513,6 @@ with open(os.path.join(dir_to_data, "VoiceTable.csv")) as csvfile:
         if row["voice_type_id"] == "7":
             unit_release_voice_table[int(row["unit_id"])] = row["voice_text"]
 
-output_json_data = {}
 for unit_id, costume_id in unit_release_table.items():
     catagory = "衣装解放"
     chapter_id = -1
@@ -576,87 +568,77 @@ for unit_id, costume_id in unit_release_table.items():
     episode_id_table[episode_id] = page_name
     episode_table[page_name] = chapter_id, section_id, episode_id, title, subtitle
 
-output_json_datas.append(output_json_data)
-
 # -----------------------------------------------------------
 
-for output_json_data in output_json_datas:
-    for page_name, page_json_data in output_json_data.items():
-        episode_id = page_json_data["id"]
-        previous_episode_id = None
-        next_episode_id = None
-        episode_name = episode_id_table[episode_id]
-        chapter_id, section_id, episode_id, title, subtitle = episode_table[
-            episode_name
+for page_name, page_json_data in output_json_data.items():
+    episode_id = page_json_data["id"]
+    previous_episode_id = None
+    next_episode_id = None
+    episode_name = episode_id_table[episode_id]
+    chapter_id, section_id, episode_id, title, subtitle = episode_table[episode_name]
+    cur_section_episode_list = sorted(section_pages[section_id])
+    episode_pos_in_section = cur_section_episode_list.index(episode_id)
+    if episode_pos_in_section == 0:
+        # first one in section, find previous section in chapter if exists
+        cur_chapter_section_list = sorted(chapter_pages[chapter_id])
+        section_pos_in_chapter = cur_chapter_section_list.index(section_id)
+        if section_pos_in_chapter == 0:
+            previous_episode_id = None
+        else:
+            previous_section_id = cur_chapter_section_list[section_pos_in_chapter - 1]
+            previous_episode_id = sorted(section_pages[previous_section_id])[-1]
+    else:
+        previous_episode_id = cur_section_episode_list[episode_pos_in_section - 1]
+    if episode_pos_in_section == len(cur_section_episode_list) - 1:
+        # last one in section, find next section in the chapter if exist
+        cur_chapter_section_list = sorted(chapter_pages[chapter_id])
+        section_pos_in_chapter = cur_chapter_section_list.index(section_id)
+        if section_pos_in_chapter == len(cur_chapter_section_list) - 1:
+            next_episode_id = None
+        else:
+            next_section_id = cur_chapter_section_list[section_pos_in_chapter + 1]
+            next_episode_id = sorted(section_pages[next_section_id])[0]
+    else:
+        next_episode_id = cur_section_episode_list[episode_pos_in_section + 1]
+    if previous_episode_id:
+        previous_title, previous_subtitle, previous_page_name = episode_page_name[
+            previous_episode_id
         ]
-        cur_section_episode_list = sorted(section_pages[section_id])
-        episode_pos_in_section = cur_section_episode_list.index(episode_id)
-        if episode_pos_in_section == 0:
-            # first one in section, find previous section in chapter if exists
-            cur_chapter_section_list = sorted(chapter_pages[chapter_id])
-            section_pos_in_chapter = cur_chapter_section_list.index(section_id)
-            if section_pos_in_chapter == 0:
-                previous_episode_id = None
-            else:
-                previous_section_id = cur_chapter_section_list[
-                    section_pos_in_chapter - 1
-                ]
-                previous_episode_id = sorted(section_pages[previous_section_id])[-1]
-        else:
-            previous_episode_id = cur_section_episode_list[episode_pos_in_section - 1]
-        if episode_pos_in_section == len(cur_section_episode_list) - 1:
-            # last one in section, find next section in the chapter if exist
-            cur_chapter_section_list = sorted(chapter_pages[chapter_id])
-            section_pos_in_chapter = cur_chapter_section_list.index(section_id)
-            if section_pos_in_chapter == len(cur_chapter_section_list) - 1:
-                next_episode_id = None
-            else:
-                next_section_id = cur_chapter_section_list[section_pos_in_chapter + 1]
-                next_episode_id = sorted(section_pages[next_section_id])[0]
-        else:
-            next_episode_id = cur_section_episode_list[episode_pos_in_section + 1]
-        if previous_episode_id:
-            previous_title, previous_subtitle, previous_page_name = episode_page_name[
-                previous_episode_id
-            ]
-            page_json_data["content"] += (
-                "\n上一话：[["
-                + previous_page_name
-                + "|"
-                + previous_title
-                + subtitle_wrapper(previous_subtitle)
-                + "]]\n"
-            )
-        else:
-            page_json_data["content"] += "上一话：无，这是篇章第一话\n"
-        page_json_data["content"] += "<br>"
-        if next_episode_id:
-            next_title, next_subtitle, next_page_name = episode_page_name[
-                next_episode_id
-            ]
-            page_json_data["content"] += (
-                "\n下一话：[["
-                + next_page_name
-                + "|"
-                + next_title
-                + subtitle_wrapper(next_subtitle)
-                + "]]\n"
-            )
-        else:
-            page_json_data["content"] += "下一话：无，篇章结束\n"
+        page_json_data["content"] += (
+            "\n上一话：[["
+            + previous_page_name
+            + "|"
+            + previous_title
+            + subtitle_wrapper(previous_subtitle)
+            + "]]\n"
+        )
+    else:
+        page_json_data["content"] += "上一话：无，这是篇章第一话\n"
+    page_json_data["content"] += "<br>"
+    if next_episode_id:
+        next_title, next_subtitle, next_page_name = episode_page_name[next_episode_id]
+        page_json_data["content"] += (
+            "\n下一话：[["
+            + next_page_name
+            + "|"
+            + next_title
+            + subtitle_wrapper(next_subtitle)
+            + "]]\n"
+        )
+    else:
+        page_json_data["content"] += "下一话：无，篇章结束\n"
 
 
 with open(os.path.join("./local_files", "image_list.txt"), "w") as used_image_file:
     for image_path in sorted(used_image_set):
         used_image_file.write(image_path + "\n")
 
-for idx, json_data in enumerate(output_json_datas):
-    with open(
-        os.path.join("./tracking_files", "comic_pages_part" + str(idx) + ".json"),
-        "w",
-        encoding="utf-8",
-    ) as comic_pages_json:
-        json.dump(json_data, comic_pages_json, ensure_ascii=False, indent=4)
+with open(
+    os.path.join("./tracking_files", "comic_pages.json"),
+    "w",
+    encoding="utf-8",
+) as comic_pages_json:
+    json.dump(output_json_data, comic_pages_json, ensure_ascii=False, indent=4)
 
 catagory_data = {}
 for catagory_name, chapter_list in catagory_pages.items():
