@@ -488,6 +488,8 @@ for output_json_data in output_json_datas:
                 + subtitle_wrapper(next_subtitle)
                 + "]]\n"
             )
+        else:
+            page_json_data["content"] += "下一页：无，篇章结束"
 
 
 with open(os.path.join("./local_files", "image_list.txt"), "w") as used_image_file:
@@ -572,6 +574,24 @@ for section_id, episode_list in section_pages.items():
     content += "{{板块|内容结束}}\n"
     content += "{{板块|结束}}\n"
     content += "{{折叠面板|内容结束}}\n"
+
+    cur_chapter_section_list = sorted(chapter_pages[section_table[section_id][0]])
+    section_pos_in_chapter = cur_chapter_section_list.index(section_id)
+    if section_pos_in_chapter < len(cur_chapter_section_list) - 1:
+        next_section_id = cur_chapter_section_list[section_pos_in_chapter + 1]
+        _, next_section_title, next_section_subtitle = section_table[next_section_id]
+        content += (
+            "下一章节：[[章节："
+            + next_section_title
+            + "|"
+            + next_section_title
+            + subtitle_wrapper(next_section_subtitle)
+            + "]]\n"
+        )
+    else:
+        content += "下一章节：无，篇章结束\n"
+    content += "[[分类:章节]]"
+
     d["content"] = content
     section_data["章节：" + section_table[section_id][1]] = d
 with open(
