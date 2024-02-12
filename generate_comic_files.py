@@ -256,14 +256,22 @@ with open(os.path.join(dir_to_data, "UnitSpeechTable.csv")) as csvfile:
         unit_speech_group_table.setdefault(int(row["group_id"]), []).append(
             row["speech_text"]
         )
+unit_speech_group_table[-1] = ["这是我的衣装解放演出哦"]
+unit_speech_group_table[-2] = ["欢迎来到红魔塔"]
 
 chapter_table: dict[int, str] = {}
+chapter_kanban_info: dict[int, tuple[int, int]] = {}
 with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         chapter_table[int(row["id"])] = row["title"]
+        chapter_kanban_info[int(row["id"])] = (
+            int(row["costume_id"]),
+            int(row["unit_speech_group_id"]),
+        )
 
 section_table: dict[int, tuple[int, str, str]] = {}
+section_kanban_info: dict[int, tuple[int, int]] = {}
 with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -271,6 +279,10 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
             int(row["chapter_id"]),
             row["title"],
             row["sub_title"],
+        )
+        section_kanban_info[int(row["id"])] = (
+            int(row["costume_id"]),
+            int(row["unit_speech_group_id"]),
         )
 
 episode_table: dict[str, tuple[int, int, int, str, str]] = {}
@@ -308,6 +320,7 @@ with open(os.path.join(dir_to_data, "CharacterEpisodeTable.csv")) as csvfile:
         title = unit_table[int(row["unit_id"])] + "的衣装解放"
         subtitle = ""
         section_table[section_id] = (chapter_id, title, subtitle)
+        section_kanban_info[section_id] = (int(row["unit_id"] + "01"), -1)
         episode_table[comic_filepath] = (
             chapter_id,
             section_id,
@@ -330,6 +343,7 @@ with open(os.path.join(dir_to_data, "TowerTable.csv")) as csvfile:
         title = row["title"]
         subtitle = row["comic_title"]
         section_table[section_id] = (chapter_id, title, subtitle)
+        section_kanban_info[section_id] = (100303, -2)
         episode_table[comic_filepath] = (
             chapter_id,
             section_id,
@@ -348,6 +362,16 @@ episode_table["tower-scarletdeviltower-floor0"] = (
 )
 episode_id_table[-20000000] = "tower-scarletdeviltower-floor0"
 
+relic_chapter_table: dict[int, tuple[int, int, int]] = {}
+with open(os.path.join(dir_to_data, "RelicChapterTable.csv")) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        relic_chapter_table[int(row["id"])] = (
+            int(row["costume_id"]),
+            int(row["unit_speech_group_id"]),
+            int(row["display_order"]),
+        )
+
 with open(os.path.join(dir_to_data, "RelicQuestTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -355,12 +379,25 @@ with open(os.path.join(dir_to_data, "RelicQuestTable.csv")) as csvfile:
         comic_filepath = extract_comic_filepath(comic_filepath)
         if not comic_filepath.startswith("daily"):
             assert comic_filepath not in episode_table
+        relic_chapter_id = int(row["relic_chapter_id"])
+        (
+            kanban_costume_id,
+            kanban_unit_speech_group_id,
+            display_order,
+        ) = relic_chapter_table[relic_chapter_id]
+        display_order *= 100
         chapter_id = -3
-        section_id = -(30000000 - int(row["id"]))
+        section_id = -(30000000 - display_order)
         episode_id = -(30000000 - int(row["id"]))
         title = row["title"]
         subtitle = "相关角色: " + unit_table[int(row["id"][:-2])]
+        while section_id in section_table:
+            section_id += 1
         section_table[section_id] = (chapter_id, title, subtitle)
+        section_kanban_info[section_id] = (
+            kanban_costume_id,
+            kanban_unit_speech_group_id,
+        )
         episode_table[comic_filepath] = (
             chapter_id,
             section_id,
