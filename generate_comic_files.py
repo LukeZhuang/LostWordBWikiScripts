@@ -26,6 +26,12 @@ def wrap(text: str) -> str:
     return text
 
 
+def subtitle_wrapper(subtitle: str) -> str:
+    if re.search(r"^\s*$", subtitle) or subtitle == "(empty)":
+        return ""
+    return "【" + subtitle + "】"
+
+
 def get_ucid(order: dict[str, dict]) -> str:
     if "m_ucid" in order:
         return str(order["m_ucid"])
@@ -264,6 +270,14 @@ if 307201 not in costume_table:
 if 201801 not in costume_table:
     costume_table[201801] = ("八意永琳", "绯苍的贤帝")
 
+unit_speech_group_table: dict[int, list[str]] = {}
+with open(os.path.join(dir_to_data, "UnitSpeechTable.csv")) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        unit_speech_group_table.setdefault(int(row["group_id"]), []).append(
+            row["speech_text"]
+        )
+
 chapter_table: dict[int, str] = {}
 with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
@@ -381,7 +395,7 @@ chapter_table[-1] = "衣装解放剧情"
 chapter_table[-2] = "红魔塔剧情"
 chapter_table[-3] = "记忆遗迹"
 
-output_dir = os.path.join("./tracking_files", "comic_output")
+output_dir = os.path.join("./local_files", "comic_output")
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
@@ -467,7 +481,7 @@ with open(os.path.join("./local_files", "image_list.txt"), "w") as used_image_fi
 
 for idx, json_data in enumerate(output_json_datas):
     with open(
-        os.path.join("./local_files", "comic_pages_part" + str(idx) + ".json"),
+        os.path.join("./tracking_files", "comic_pages_part" + str(idx) + ".json"),
         "w",
         encoding="utf-8",
     ) as comic_pages_json:
@@ -482,7 +496,7 @@ for catagory_name, chapter_list in catagory_pages.items():
     d["content"] = content
     catagory_data[catagory_name] = d
 with open(
-    os.path.join("./local_files", "catagory_pages.json"), "w", encoding="utf-8"
+    os.path.join("./tracking_files", "catagory_pages.json"), "w", encoding="utf-8"
 ) as json_file:
     json.dump(catagory_data, json_file, ensure_ascii=False, indent=4)
 
@@ -498,57 +512,54 @@ for chapter_id, section_list in chapter_pages.items():
     content += "{{板块|内容开始}}\n"
     for section_id in sorted(section_list):
         section_name = section_table[section_id][1]
-        content += "{{板块|按钮|章节：" + section_name + "|" + section_name + "}}"
+        section_subtitle = section_table[section_id][2]
+        content += (
+            "<div>{{板块|按钮|章节："
+            + section_name
+            + "|"
+            + section_name
+            + subtitle_wrapper(section_subtitle)
+            + "}}</div>\n"
+        )
     content += "{{板块|内容结束}}\n"
     content += "{{板块|结束}}\n"
     content += "{{折叠面板|内容结束}}\n"
+    content += "-------------------------------\n"
     d["content"] = content
     chapter_data["篇章：" + chapter_table[chapter_id]] = d
 with open(
-    os.path.join("./local_files", "chapter_pages.json"), "w", encoding="utf-8"
+    os.path.join("./tracking_files", "chapter_pages.json"), "w", encoding="utf-8"
 ) as json_file:
     json.dump(chapter_data, json_file, ensure_ascii=False, indent=4)
 
 section_data = {}
 for section_id, episode_list in section_pages.items():
     d = {}
-    content = ""
     chapter_name = chapter_table[section_table[section_id][0]]
-    content += "{{面包屑|篇章：" + chapter_name + "}}"
-    content += '<div style="overflow:auto">\n'
-    content += (
-        "<div class=\"section_title\">'''章节标题'''："
-        + section_table[section_id][1]
-        + "</div>\n"
+    content = ""
+    content += "{{面包屑|篇章：" + chapter_name + "}}\n"
+    section_name = section_table[section_id][1] + subtitle_wrapper(
+        section_table[section_id][2]
     )
-    content += (
-        "<div class=\"section_subtitle\">'''章节副标题'''："
-        + section_table[section_id][2]
-        + "</div>\n"
-    )
-    content += (
-        "<div class=\"section_belonging\">'''所属篇章'''：[[篇章："
-        + chapter_name
-        + "|"
-        + chapter_name
-        + "]]</div>\n"
-    )
-    content += "<br><br>"
-    content += '<div class="episodes_wrapper">\n'
+    content += "{{折叠面板|开始|主框=1}}\n"
+    content += "{{折叠面板|标题=" + section_name + "|选项=1|主框=1|样式=primary|展开=是}}\n"
+    content += "{{板块|内容开始}}\n"
     for episode_id in sorted(episode_list):
-        content += '<div class="episode_li">'
         title, subtitle, page_name = episode_page_name[episode_id]
         content += (
-            '<div class="episode_title">[[' + page_name + "|" + title + "]]</div>"
+            "<div>{{板块|按钮|"
+            + page_name
+            + "|"
+            + title
+            + subtitle_wrapper(subtitle)
+            + "}}</div>\n"
         )
-        content += '<div class="episode_subtitle">  - ' + subtitle + "</div>"
-        content += "</div>\n"
-        content += "<br>"
-    content += "</div>\n"
-    content += "</div>"
+    content += "{{板块|内容结束}}\n"
+    content += "{{板块|结束}}\n"
+    content += "{{折叠面板|内容结束}}\n"
     d["content"] = content
     section_data["章节：" + section_table[section_id][1]] = d
 with open(
-    os.path.join("./local_files", "section_pages.json"), "w", encoding="utf-8"
+    os.path.join("./tracking_files", "section_pages.json"), "w", encoding="utf-8"
 ) as json_file:
     json.dump(section_data, json_file, ensure_ascii=False, indent=4)
