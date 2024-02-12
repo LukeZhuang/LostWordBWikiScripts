@@ -49,6 +49,8 @@ def process_order(
     costume_table: dict[int, tuple[str, str]],
 ):
     if order_name == "BattleOrder":
+        if env.get("last_valid_order", "") == "BattleOrder":
+            return ""
         return "{{剧本模板事件|文本=姬烈的战斗。。。}}"
     elif order_name == "ButtonOrder":
         return "{{剧本模板玩家选项|选项1=" + wrap(order["m_strbtn"]) + "|选项2=|选项3=}}"
@@ -91,30 +93,6 @@ def process_order(
         return "{{剧本模板事件|图片=" + bg_file + "|文本=【切换背景】}}"
     elif order_name == "LoadItemOrder":
         return ""
-        item_file = order["m_name"]
-        if item_file.lower().startswith("graphics/comic/item/"):
-            used_image_set.add("5 " + item_file)
-            item_file = "CITM_" + item_file[20:]
-        elif item_file.lower().startswith("graphics/thumbnail/items/"):
-            used_image_set.add("6 " + item_file)
-            item_file = "TITM" + item_file[25:]
-        elif item_file.lower().startswith("graphics/comic/bg/"):
-            used_image_set.add("7 " + item_file)
-            item_file = "CBG" + item_file[18:]
-        elif item_file.lower().startswith(
-            "graphics/thumbnail/events/thumbnail_eventitem_"
-        ):
-            used_image_set.add("8 " + item_file)
-            item_file = "EVEITM_" + item_file[46:]
-        elif item_file.lower().startswith("graphics/thumbnail/groupicons/"):
-            used_image_set.add("9 " + item_file)
-            item_file = "GITM" + item_file[30:]
-        elif item_file.lower().startswith("graphics/thumbnail/objects/"):
-            used_image_set.add("10 " + item_file)
-            item_file = "OBJITM" + item_file[27:]
-        else:
-            raise Exception("unhandled item file path")
-        return "{{剧本模板事件|图片=" + item_file + "|文本=【展示物品】}}"
     elif order_name == "LoadUnitOrder":
         ucid = get_ucid(order)
         unit_names[ucid] = order["m_name"]
@@ -176,6 +154,7 @@ def process_order(
         "LetterBoxOrder",
         "LoadCameraEffect",
         "LoadEffectOrder",
+        "LoadItemOrder",
         "LoadRuleOrder",
         "MicroSkipOrder",
         "MoveBGOrder",
@@ -459,6 +438,7 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
                 bgm_table,
                 costume_table,
             ):
+                env["last_valid_order"] = order_name
                 output_lines.append(result_str + "\n")
         output_lines.append("</div>\n")
         output_lines.append("[[分类:剧本]]")
