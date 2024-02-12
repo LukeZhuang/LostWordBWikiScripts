@@ -503,6 +503,84 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
 output_json_datas.append(output_json_data)
 
 
+# -------------------- hard coded episodes-------------------
+unit_release_table: dict[int, int] = {}
+with open(os.path.join(dir_to_data, "UnitReincarnationReleaseTable.csv")) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        unit_id = int(row["unit_id"])
+        release_function = json.loads(row["release_function"].replace("|", ","))
+        if "2" in release_function:
+            costume_id = release_function["2"]
+            unit_release_table[unit_id] = costume_id
+
+unit_release_voice_table: dict[int, str] = {}
+with open(os.path.join(dir_to_data, "VoiceTable.csv")) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        if row["voice_type_id"] == "7":
+            unit_release_voice_table[int(row["unit_id"])] = row["voice_text"]
+
+output_json_data = {}
+for unit_id, costume_id in unit_release_table.items():
+    catagory = "衣装解放"
+    chapter_id = -1
+    section_id = -(10000000 - int(unit_id))
+    episode_id = -(10000000 - int(str(unit_id) + "01") - 1)
+    title = unit_table[unit_id] + "的服装解放演出"
+    subtitle = ""
+    page_name = catagory + "剧本：" + title
+    assert (
+        section_id in section_pages
+        and chapter_id in chapter_pages
+        and catagory + "剧情" in catagory_pages
+    )
+    section_pages[section_id].add(episode_id)
+    chapter_name = chapter_table[chapter_id]
+    section_name = section_table[section_id][1]
+    content = (
+        "{{面包屑|" + catagory + "剧情|篇章：" + chapter_name + "|章节：" + section_name + "}}\n"
+    )
+    content += "{{#Widget:ScenarioStyles}}\n"
+    content += "'''类型''': [[" + catagory + "剧情]]<br>\n"
+    content += "'''所属篇章''': [[篇章：" + chapter_name + "|" + chapter_name + "]]<br>\n"
+    content += "'''所属章节''': [[章节：" + section_name + "|" + section_name + "]]<br>\n"
+    content += "'''当前剧目标题''': " + title + "<br>\n"
+    content += "'''副标题''': " + subtitle + "<br>\n"
+    content += '<div style="display:inline-block;width:100%;">\n'
+    content += "{{剧本模板事件|文本=播放BGM：" + bgm_table[1001] + "}}\n"
+    unit_name, name = costume_table[int(costume_id)]
+    content += (
+        "{{剧本模板事件|图片=CH"
+        + str(costume_id)
+        + ".png|文本=介绍角色：\n"
+        + unit_name
+        + "\n【"
+        + name
+        + "】}}\n"
+    )
+    content += (
+        "{{剧本模板对话框|图片=S"
+        + str(costume_id)
+        + ".png|角色名="
+        + unit_name
+        + "|文本="
+        + wrap(unit_release_voice_table[unit_id])
+        + "}}\n"
+    )
+    content += "{{剧本模板事件|文本=BGM停止}}\n"
+    content += "</div>\n"
+    content += "[[分类:剧本]]"
+    cur_json_data = {"content": content, "id": episode_id}
+    output_json_data[page_name] = cur_json_data
+    episode_page_name[episode_id] = (title, subtitle, page_name)
+    episode_id_table[episode_id] = page_name
+    episode_table[page_name] = chapter_id, section_id, episode_id, title, subtitle
+
+output_json_datas.append(output_json_data)
+
+# -----------------------------------------------------------
+
 for output_json_data in output_json_datas:
     for page_name, page_json_data in output_json_data.items():
         episode_id = page_json_data["id"]
