@@ -257,7 +257,6 @@ with open(os.path.join(dir_to_data, "UnitSpeechTable.csv")) as csvfile:
         unit_speech_group_table.setdefault(int(row["group_id"]), []).append(
             row["speech_text"]
         )
-unit_speech_group_table[-1] = ["这是我的衣装解放演出哦"]
 unit_speech_group_table[-2] = ["欢迎来到红魔塔"]
 
 chapter_table: dict[int, str] = {}
@@ -584,6 +583,7 @@ output_json_datas.append(output_json_data)
 for output_json_data in output_json_datas:
     for page_name, page_json_data in output_json_data.items():
         episode_id = page_json_data["id"]
+        previous_episode_id = None
         next_episode_id = None
         episode_name = episode_id_table[episode_id]
         chapter_id, section_id, episode_id, title, subtitle = episode_table[
@@ -591,6 +591,19 @@ for output_json_data in output_json_datas:
         ]
         cur_section_episode_list = sorted(section_pages[section_id])
         episode_pos_in_section = cur_section_episode_list.index(episode_id)
+        if episode_pos_in_section == 0:
+            # first one in section, find previous section in chapter if exists
+            cur_chapter_section_list = sorted(chapter_pages[chapter_id])
+            section_pos_in_chapter = cur_chapter_section_list.index(section_id)
+            if section_pos_in_chapter == 0:
+                previous_episode_id = None
+            else:
+                previous_section_id = cur_chapter_section_list[
+                    section_pos_in_chapter - 1
+                ]
+                previous_episode_id = sorted(section_pages[previous_section_id])[-1]
+        else:
+            previous_episode_id = cur_section_episode_list[episode_pos_in_section - 1]
         if episode_pos_in_section == len(cur_section_episode_list) - 1:
             # last one in section, find next section in the chapter if exist
             cur_chapter_section_list = sorted(chapter_pages[chapter_id])
@@ -602,6 +615,21 @@ for output_json_data in output_json_datas:
                 next_episode_id = sorted(section_pages[next_section_id])[0]
         else:
             next_episode_id = cur_section_episode_list[episode_pos_in_section + 1]
+        if previous_episode_id:
+            previous_title, previous_subtitle, previous_page_name = episode_page_name[
+                previous_episode_id
+            ]
+            page_json_data["content"] += (
+                "\n上一话：[["
+                + previous_page_name
+                + "|"
+                + previous_title
+                + subtitle_wrapper(previous_subtitle)
+                + "]]\n"
+            )
+        else:
+            page_json_data["content"] += "上一话：无，这是篇章第一话\n"
+        page_json_data["content"] += "<br>"
         if next_episode_id:
             next_title, next_subtitle, next_page_name = episode_page_name[
                 next_episode_id
@@ -615,7 +643,7 @@ for output_json_data in output_json_datas:
                 + "]]\n"
             )
         else:
-            page_json_data["content"] += "下一页：无，篇章结束"
+            page_json_data["content"] += "下一话：无，篇章结束\n"
 
 
 with open(os.path.join("./local_files", "image_list.txt"), "w") as used_image_file:
@@ -735,6 +763,22 @@ for section_id, episode_list in section_pages.items():
 
     cur_chapter_section_list = sorted(chapter_pages[section_table[section_id][0]])
     section_pos_in_chapter = cur_chapter_section_list.index(section_id)
+    if section_pos_in_chapter > 0:
+        previous_section_id = cur_chapter_section_list[section_pos_in_chapter - 1]
+        _, previous_section_title, previous_section_subtitle = section_table[
+            previous_section_id
+        ]
+        content += (
+            "上一章节：[[章节："
+            + previous_section_title
+            + "|"
+            + previous_section_title
+            + subtitle_wrapper(previous_section_subtitle)
+            + "]]\n"
+        )
+    else:
+        content += "上一章节：无，这是篇章第一节\n"
+    content += "<br>"
     if section_pos_in_chapter < len(cur_chapter_section_list) - 1:
         next_section_id = cur_chapter_section_list[section_pos_in_chapter + 1]
         _, next_section_title, next_section_subtitle = section_table[next_section_id]
