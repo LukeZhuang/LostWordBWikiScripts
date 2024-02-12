@@ -443,7 +443,7 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
         output_lines.append("</div>\n")
         output_lines.append("[[分类:剧本]]")
         fo.write("".join(output_lines))
-    cur_json_data = {"content": "".join(output_lines)}
+    cur_json_data = {"content": "".join(output_lines), "id": episode_id}
     page_name = catagory + "剧本：" + title
     assert page_name not in output_json_data
     output_json_data[page_name] = cur_json_data
@@ -453,6 +453,41 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
         output_json_datas.append(output_json_data)
         output_json_data = {}
 output_json_datas.append(output_json_data)
+
+
+for output_json_data in output_json_datas:
+    for page_name, page_json_data in output_json_data.items():
+        episode_id = page_json_data["id"]
+        next_episode_id = None
+        episode_name = episode_id_table[episode_id]
+        chapter_id, section_id, episode_id, title, subtitle = episode_table[
+            episode_name
+        ]
+        cur_section_episode_list = sorted(section_pages[section_id])
+        episode_pos_in_section = cur_section_episode_list.index(episode_id)
+        if episode_pos_in_section == len(cur_section_episode_list) - 1:
+            # last one in section, find next section in the chapter if exist
+            cur_chapter_section_list = sorted(chapter_pages[chapter_id])
+            section_pos_in_chapter = cur_chapter_section_list.index(section_id)
+            if section_pos_in_chapter == len(cur_chapter_section_list) - 1:
+                next_episode_id = None
+            else:
+                next_section_id = cur_chapter_section_list[section_pos_in_chapter + 1]
+                next_episode_id = sorted(section_pages[next_section_id])[0]
+        else:
+            next_episode_id = cur_section_episode_list[episode_pos_in_section + 1]
+        if next_episode_id:
+            next_title, next_subtitle, next_page_name = episode_page_name[
+                next_episode_id
+            ]
+            page_json_data["content"] += (
+                "\n下一页：[["
+                + next_page_name
+                + "|"
+                + next_title
+                + subtitle_wrapper(next_subtitle)
+                + "]]\n"
+            )
 
 
 with open(os.path.join("./local_files", "image_list.txt"), "w") as used_image_file:
