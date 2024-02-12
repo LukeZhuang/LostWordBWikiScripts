@@ -280,7 +280,8 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
             row["sub_title"],
         )
 
-episode_table: dict[str, tuple[int, int, str, str]] = {}
+episode_table: dict[str, tuple[int, int, int, str, str]] = {}
+episode_id_table: dict[int, str] = {}
 with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -289,15 +290,17 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         if not comic_filepath.startswith("daily"):
             assert (
                 comic_filepath not in episode_table
-                or episode_table[comic_filepath][2] == row["title"]
-                or episode_table[comic_filepath][3] == row["sub_title"]
+                or episode_table[comic_filepath][3] == row["title"]
+                or episode_table[comic_filepath][4] == row["sub_title"]
             )
         episode_table[comic_filepath] = (
             int(row["chapter_id"]),
             int(row["section_id"]),
+            int(row["id"]),
             row["title"],
             row["sub_title"],
         )
+        episode_id_table[int(row["id"])] = comic_filepath
 
 with open(os.path.join(dir_to_data, "CharacterEpisodeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
@@ -307,11 +310,19 @@ with open(os.path.join(dir_to_data, "CharacterEpisodeTable.csv")) as csvfile:
         if not comic_filepath.startswith("daily"):
             assert comic_filepath not in episode_table
         chapter_id = -1
-        section_id = -(10000000 + int(row["unit_id"]))
+        section_id = -(10000000 - int(row["unit_id"]))
+        episode_id = -(10000000 - int(row["id"]))
         title = unit_table[int(row["unit_id"])] + "的衣装解放"
         subtitle = ""
         section_table[section_id] = (chapter_id, title, subtitle)
-        episode_table[comic_filepath] = (chapter_id, section_id, title, subtitle)
+        episode_table[comic_filepath] = (
+            chapter_id,
+            section_id,
+            episode_id,
+            title,
+            subtitle,
+        )
+        episode_id_table[episode_id] = comic_filepath
 
 with open(os.path.join(dir_to_data, "TowerTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
@@ -321,13 +332,28 @@ with open(os.path.join(dir_to_data, "TowerTable.csv")) as csvfile:
         if not comic_filepath.startswith("daily"):
             assert comic_filepath not in episode_table
         chapter_id = -2
-        section_id = -(20000000 + int(row["floor"]))
+        section_id = -(20000000 - int(row["floor"]))
+        episode_id = -(20000000 - int(row["id"]))
         title = row["title"]
         subtitle = row["comic_title"]
         section_table[section_id] = (chapter_id, title, subtitle)
-        episode_table[comic_filepath] = (chapter_id, section_id, title, subtitle)
+        episode_table[comic_filepath] = (
+            chapter_id,
+            section_id,
+            episode_id,
+            title,
+            subtitle,
+        )
+        episode_id_table[episode_id] = comic_filepath
 section_table[-20000000] = (-2, "红魔塔序章", "红魔塔序章")
-episode_table["tower-scarletdeviltower-floor0"] = (-2, -20000000, "红魔塔序章", "红魔塔序章")
+episode_table["tower-scarletdeviltower-floor0"] = (
+    -2,
+    -20000000,
+    -20000000,
+    "红魔塔序章",
+    "红魔塔序章",
+)
+episode_id_table[-20000000] = "tower-scarletdeviltower-floor0"
 
 with open(os.path.join(dir_to_data, "RelicQuestTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
@@ -337,11 +363,19 @@ with open(os.path.join(dir_to_data, "RelicQuestTable.csv")) as csvfile:
         if not comic_filepath.startswith("daily"):
             assert comic_filepath not in episode_table
         chapter_id = -3
-        section_id = -(30000000 + int(row["id"]))
+        section_id = -(30000000 - int(row["id"]))
+        episode_id = -(30000000 - int(row["id"]))
         title = row["title"]
         subtitle = "相关角色: " + unit_table[int(row["id"][:-2])]
         section_table[section_id] = (chapter_id, title, subtitle)
-        episode_table[comic_filepath] = (chapter_id, section_id, title, subtitle)
+        episode_table[comic_filepath] = (
+            chapter_id,
+            section_id,
+            episode_id,
+            title,
+            subtitle,
+        )
+        episode_id_table[episode_id] = comic_filepath
 
 chapter_table[-1] = "衣装解放剧情"
 chapter_table[-2] = "红魔塔剧情"
@@ -354,6 +388,10 @@ if not os.path.exists(output_dir):
 
 output_json_datas = []
 output_json_data = {}
+chapter_pages: dict[int, set[int]] = {}
+section_pages: dict[int, set[int]] = {}
+catagory_pages: dict[str, set[int]] = {}
+episode_page_name: dict[int, tuple[str, str, str]] = {}
 used_image_set: set[str] = set()
 cnt = 0
 for json_file_name in sorted(os.listdir(dir_to_jsons)):
@@ -362,23 +400,26 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
     if episode_name.startswith("daily") or episode_name not in episode_table:
         print("not handled:", episode_name)
         continue
-    chapter_id, section_id, title, subtitle = episode_table[episode_name]
+    chapter_id, section_id, episode_id, title, subtitle = episode_table[episode_name]
     # print(json_file_name, title, subtitle, chapter_table[chapter_id], section_table[section_id])
     catagory = get_file_catagory(json_file_name)
+    chapter_name = chapter_table[chapter_id]
+    section_name = section_table[section_id][1]
+    section_pages.setdefault(section_id, set()).add(episode_id)
+    chapter_pages.setdefault(chapter_id, set()).add(section_id)
+    catagory_pages.setdefault(catagory + "剧情", set()).add(chapter_id)
     output_lines = []
     with open(output_file_name, "w") as fo:
         output_lines.append(
             "{{面包屑|"
             + catagory
             + "剧情|篇章："
-            + chapter_table[chapter_id]
+            + chapter_name
             + "|章节："
-            + section_table[section_id][1]
+            + section_name
             + "}}\n"
         )
         output_lines.append("{{#Widget:ScenarioStyles}}\n")
-        chapter_name = chapter_table[chapter_id]
-        section_name = section_table[section_id][1]
         output_lines.append("'''类型''': [[" + catagory + "剧情]]<br>\n")
         output_lines.append(
             "'''所属篇章''': [[篇章：" + chapter_name + "|" + chapter_name + "]]<br>\n"
@@ -412,6 +453,7 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
     page_name = catagory + "剧本：" + title
     assert page_name not in output_json_data
     output_json_data[page_name] = cur_json_data
+    episode_page_name[episode_id] = (title, subtitle, page_name)
     cnt += 1
     if cnt % 500 == 0:
         output_json_datas.append(output_json_data)
@@ -430,3 +472,83 @@ for idx, json_data in enumerate(output_json_datas):
         encoding="utf-8",
     ) as comic_pages_json:
         json.dump(json_data, comic_pages_json, ensure_ascii=False, indent=4)
+
+catagory_data = {}
+for catagory_name, chapter_list in catagory_pages.items():
+    d = {}
+    content = ""
+    for chapter_id in sorted(chapter_list):
+        content += "{{#lst:篇章：" + chapter_table[chapter_id] + "}}\n"
+    d["content"] = content
+    catagory_data[catagory_name] = d
+with open(
+    os.path.join("./local_files", "catagory_pages.json"), "w", encoding="utf-8"
+) as json_file:
+    json.dump(catagory_data, json_file, ensure_ascii=False, indent=4)
+
+
+chapter_data = {}
+for chapter_id, section_list in chapter_pages.items():
+    d = {}
+    content = ""
+    content += "{{折叠面板|开始|主框=1}}\n"
+    content += (
+        "{{折叠面板|标题=" + chapter_table[chapter_id] + "|选项=1|主框=1|样式=warning|展开=是}}\n"
+    )
+    content += "{{板块|内容开始}}\n"
+    for section_id in sorted(section_list):
+        section_name = section_table[section_id][1]
+        content += "{{板块|按钮|章节：" + section_name + "|" + section_name + "}}"
+    content += "{{板块|内容结束}}\n"
+    content += "{{板块|结束}}\n"
+    content += "{{折叠面板|内容结束}}\n"
+    d["content"] = content
+    chapter_data["篇章：" + chapter_table[chapter_id]] = d
+with open(
+    os.path.join("./local_files", "chapter_pages.json"), "w", encoding="utf-8"
+) as json_file:
+    json.dump(chapter_data, json_file, ensure_ascii=False, indent=4)
+
+section_data = {}
+for section_id, episode_list in section_pages.items():
+    d = {}
+    content = ""
+    chapter_name = chapter_table[section_table[section_id][0]]
+    content += "{{面包屑|篇章：" + chapter_name + "}}"
+    content += '<div style="overflow:auto">\n'
+    content += (
+        "<div class=\"section_title\">'''章节标题'''："
+        + section_table[section_id][1]
+        + "</div>\n"
+    )
+    content += (
+        "<div class=\"section_subtitle\">'''章节副标题'''："
+        + section_table[section_id][2]
+        + "</div>\n"
+    )
+    content += (
+        "<div class=\"section_belonging\">'''所属篇章'''：[[篇章："
+        + chapter_name
+        + "|"
+        + chapter_name
+        + "]]</div>\n"
+    )
+    content += "<br><br>"
+    content += '<div class="episodes_wrapper">\n'
+    for episode_id in sorted(episode_list):
+        content += '<div class="episode_li">'
+        title, subtitle, page_name = episode_page_name[episode_id]
+        content += (
+            '<div class="episode_title">[[' + page_name + "|" + title + "]]</div>"
+        )
+        content += '<div class="episode_subtitle">  - ' + subtitle + "</div>"
+        content += "</div>\n"
+        content += "<br>"
+    content += "</div>\n"
+    content += "</div>"
+    d["content"] = content
+    section_data["章节：" + section_table[section_id][1]] = d
+with open(
+    os.path.join("./local_files", "section_pages.json"), "w", encoding="utf-8"
+) as json_file:
+    json.dump(section_data, json_file, ensure_ascii=False, indent=4)
