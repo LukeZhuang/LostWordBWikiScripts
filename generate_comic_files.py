@@ -18,6 +18,7 @@ dir_to_data = sys.argv[2]
 def wrap(text: str) -> str:
     text = text.replace("\n", "<br>")
     text = text.replace("~", "～")
+    text = text.replace("<ret>", "")
     if "\u001b" in text:
         text = text.replace("\u001bh", "(主角名)")
         if "\u001b" in text:
@@ -410,6 +411,7 @@ with open(os.path.join(dir_to_data, "RelicQuestTable.csv")) as csvfile:
 chapter_table[-1] = "衣装解放剧情"
 chapter_table[-2] = "红魔塔剧情"
 chapter_table[-3] = "记忆遗迹"
+chapter_kanban_info[-2] = (100303, -2)
 
 output_dir = os.path.join("./local_files", "comic_output")
 if not os.path.exists(output_dir):
@@ -559,6 +561,13 @@ chapter_data = {}
 for chapter_id, section_list in chapter_pages.items():
     d = {}
     content = ""
+    content += "{{#Widget:ChapterSectionDisplay}}\n"
+    if chapter_id in chapter_kanban_info:
+        costume_id, unit_speech_group_id = chapter_kanban_info[chapter_id]
+        content += "{{章节看板|角色服装=" + str(costume_id)
+        for idx, speech in enumerate(unit_speech_group_table[unit_speech_group_id]):
+            content += "|对话" + str(idx + 1) + "=" + wrap(speech)
+        content += "}}\n"
     content += "{{折叠面板|开始|主框=1}}\n"
     content += (
         "{{折叠面板|标题=" + chapter_table[chapter_id] + "|选项=1|主框=1|样式=warning|展开=是}}\n"
@@ -592,6 +601,13 @@ for section_id, episode_list in section_pages.items():
     chapter_name = chapter_table[section_table[section_id][0]]
     content = ""
     content += "{{面包屑|篇章：" + chapter_name + "}}\n"
+    content += "{{#Widget:ChapterSectionDisplay}}\n"
+    if section_id in section_kanban_info:
+        costume_id, unit_speech_group_id = section_kanban_info[section_id]
+        content += "{{章节看板|角色服装=" + str(costume_id)
+        for idx, speech in enumerate(unit_speech_group_table[unit_speech_group_id]):
+            content += "|对话" + str(idx + 1) + "=" + wrap(speech)
+        content += "}}\n"
     section_name = section_table[section_id][1] + subtitle_wrapper(
         section_table[section_id][2]
     )
