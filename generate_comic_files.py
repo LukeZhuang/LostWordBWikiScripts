@@ -308,6 +308,15 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         )
         episode_id_table[int(row["id"])] = comic_filepath
 
+chara_chapter_table: dict[int, tuple[int, int]] = {}
+with open(os.path.join(dir_to_data, "CharacterQuestChapterTable.csv")) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        chara_chapter_table[int(row["target_unit_id"])] = (
+            int(row["costume_id"]),
+            int(row["unit_speech_group_id"]),
+        )
+
 with open(os.path.join(dir_to_data, "CharacterEpisodeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -321,7 +330,7 @@ with open(os.path.join(dir_to_data, "CharacterEpisodeTable.csv")) as csvfile:
         title = unit_table[int(row["unit_id"])] + "的衣装解放"
         subtitle = ""
         section_table[section_id] = (chapter_id, title, subtitle)
-        section_kanban_info[section_id] = (int(row["unit_id"] + "01"), -1)
+        section_kanban_info[section_id] = chara_chapter_table[int(row["unit_id"])]
         episode_table[comic_filepath] = (
             chapter_id,
             section_id,
@@ -520,7 +529,7 @@ for output_json_data in output_json_datas:
                 next_episode_id
             ]
             page_json_data["content"] += (
-                "\n下一页：[["
+                "\n下一话：[["
                 + next_page_name
                 + "|"
                 + next_title
@@ -557,22 +566,36 @@ with open(
     json.dump(catagory_data, json_file, ensure_ascii=False, indent=4)
 
 
+chapter_uniq_id = 10  # used in fold-box
 chapter_data = {}
 for chapter_id, section_list in chapter_pages.items():
     d = {}
     content = ""
+    fold_id1 = str(chapter_uniq_id + 1)
+    fold_id2 = str(chapter_uniq_id + 2)
     content += "{{#Widget:ChapterSectionDisplay}}\n"
+    content += "{{折叠面板|开始|主框=" + fold_id1 + "}}\n"
+    content += (
+        "{{折叠面板|标题="
+        + chapter_table[chapter_id]
+        + "|选项="
+        + fold_id1
+        + "|主框="
+        + fold_id1
+        + "|样式=warning|展开=是}}\n"
+    )
+    content += "{{板块|内容开始}}\n"
     if chapter_id in chapter_kanban_info:
         costume_id, unit_speech_group_id = chapter_kanban_info[chapter_id]
+        content += "{{折叠面板|开始|主框=" + fold_id2 + "}}\n"
+        content += (
+            "{{折叠面板|标题=展开查看看板|选项=" + fold_id2 + "|主框=" + fold_id2 + "|样式=warning}}\n"
+        )
         content += "{{章节看板|角色服装=" + str(costume_id)
         for idx, speech in enumerate(unit_speech_group_table[unit_speech_group_id]):
             content += "|对话" + str(idx + 1) + "=" + wrap(speech)
         content += "}}\n"
-    content += "{{折叠面板|开始|主框=1}}\n"
-    content += (
-        "{{折叠面板|标题=" + chapter_table[chapter_id] + "|选项=1|主框=1|样式=warning|展开=是}}\n"
-    )
-    content += "{{板块|内容开始}}\n"
+        content += "{{折叠面板|内容结束}}\n"
     for section_id in sorted(section_list):
         section_name = section_table[section_id][1]
         section_subtitle = section_table[section_id][2]
@@ -590,6 +613,7 @@ for chapter_id, section_list in chapter_pages.items():
     content += "-------------------------------\n"
     d["content"] = content
     chapter_data["篇章：" + chapter_table[chapter_id]] = d
+    chapter_uniq_id += 10
 with open(
     os.path.join("./tracking_files", "chapter_pages.json"), "w", encoding="utf-8"
 ) as json_file:
@@ -602,18 +626,21 @@ for section_id, episode_list in section_pages.items():
     content = ""
     content += "{{面包屑|篇章：" + chapter_name + "}}\n"
     content += "{{#Widget:ChapterSectionDisplay}}\n"
-    if section_id in section_kanban_info:
-        costume_id, unit_speech_group_id = section_kanban_info[section_id]
-        content += "{{章节看板|角色服装=" + str(costume_id)
-        for idx, speech in enumerate(unit_speech_group_table[unit_speech_group_id]):
-            content += "|对话" + str(idx + 1) + "=" + wrap(speech)
-        content += "}}\n"
     section_name = section_table[section_id][1] + subtitle_wrapper(
         section_table[section_id][2]
     )
     content += "{{折叠面板|开始|主框=1}}\n"
     content += "{{折叠面板|标题=" + section_name + "|选项=1|主框=1|样式=primary|展开=是}}\n"
     content += "{{板块|内容开始}}\n"
+    if section_id in section_kanban_info:
+        costume_id, unit_speech_group_id = section_kanban_info[section_id]
+        content += "{{折叠面板|开始|主框=2}}\n"
+        content += "{{折叠面板|标题=展开查看看板|选项=2|主框=2|样式=primary}}\n"
+        content += "{{章节看板|角色服装=" + str(costume_id)
+        for idx, speech in enumerate(unit_speech_group_table[unit_speech_group_id]):
+            content += "|对话" + str(idx + 1) + "=" + wrap(speech)
+        content += "}}\n"
+        content += "{{折叠面板|内容结束}}\n"
     for episode_id in sorted(episode_list):
         title, subtitle, page_name = episode_page_name[episode_id]
         content += (
