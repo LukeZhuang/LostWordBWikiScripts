@@ -672,6 +672,8 @@ for chapter_id, section_list in chapter_pages.items():
     fold_id1 = str(chapter_uniq_id + 1)
     fold_id2 = str(chapter_uniq_id + 2)
     content += "{{#Widget:ChapterSectionDisplay}}\n"
+    if chapter_id == -1:
+        content += "{{#Widget:UnitChapterStyles}}\n"
     content += "{{折叠面板|开始|主框=" + fold_id1 + "}}\n"
     content += (
         "{{折叠面板|标题="
@@ -694,17 +696,32 @@ for chapter_id, section_list in chapter_pages.items():
             content += "|对话" + str(idx + 1) + "=" + wrap(speech)
         content += "}}\n"
         content += "{{折叠面板|内容结束}}\n"
-    for section_id in sorted(section_list):
-        section_name = section_table[section_id][1]
-        section_subtitle = section_table[section_id][2]
-        content += (
-            "<div>{{板块|按钮|章节："
-            + section_name
-            + "|"
-            + section_name
-            + subtitle_wrapper(section_subtitle)
-            + "}}</div>\n"
-        )
+    if chapter_id == -1:
+        content += "<div class=\"units-grid\">\n"
+        for section_id in sorted(section_list):
+            cur_unit_id = 10000000 + section_id
+            section_name = section_table[section_id][1]
+            content += "<div class=\"unit-wrapper\">\n"
+            content += "<div class=\"unit-img-wrapper\">\n"
+            content += "[[文件:S" + str(cur_unit_id) + "01.png|60px|link=" + unit_table[cur_unit_id] + "]]\n"
+            content += "</div>\n"
+            content += "<div class=\"unit-name-wrapper\">\n"
+            content += "[[章节：" + section_name + "|" + unit_short_name[cur_unit_id] + "]]\n"
+            content += "</div>\n"
+            content += "</div>\n"
+        content += "</div>\n"
+    else:
+        for section_id in sorted(section_list):
+            section_name = section_table[section_id][1]
+            section_subtitle = section_table[section_id][2]
+            content += (
+                "<div>{{板块|按钮|章节："
+                + section_name
+                + "|"
+                + section_name
+                + subtitle_wrapper(section_subtitle)
+                + "}}</div>\n"
+            )
     content += "{{板块|内容结束}}\n"
     content += "{{板块|结束}}\n"
     content += "{{折叠面板|内容结束}}\n"
