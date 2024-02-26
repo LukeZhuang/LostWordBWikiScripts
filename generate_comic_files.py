@@ -27,6 +27,10 @@ def wrap(text: str) -> str:
     return text
 
 
+def title_wrapper(title: str) -> str:
+    return title.replace("[", "【").replace("]", "】")
+
+
 def subtitle_wrapper(subtitle: str) -> str:
     if re.search(r"^\s*$", subtitle) or subtitle == "(empty)":
         return ""
@@ -233,10 +237,12 @@ if 1066 not in bgm_table:
     bgm_table[1066] = "？？？" + "【原曲：" + "なし" + "】"
 
 unit_table: dict[int, str] = {}
+unit_short_name: dict[int, str] = {}
 with open(os.path.join(dir_to_data, "UnitTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         unit_table[int(row["id"])] = row["name"] + row["symbol_name"]
+        unit_short_name[int(row["id"])] = row["short_name"] + row["symbol_name"]
 
 costume_table: dict[int, tuple[str, str]] = {}
 with open(os.path.join(dir_to_data, "CostumeTable.csv")) as csvfile:
@@ -264,7 +270,7 @@ chapter_kanban_info: dict[int, tuple[int, int]] = {}
 with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        chapter_table[int(row["id"])] = row["title"]
+        chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
             int(row["unit_speech_group_id"]),
@@ -277,7 +283,7 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
     for row in reader:
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
-            row["title"],
+            title_wrapper(row["title"]),
             row["sub_title"],
         )
         section_kanban_info[int(row["id"])] = (
@@ -295,14 +301,14 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         if not comic_filepath.startswith("daily"):
             assert (
                 comic_filepath not in episode_table
-                or episode_table[comic_filepath][3] == row["title"]
+                or episode_table[comic_filepath][3] == title_wrapper(row["title"])
                 or episode_table[comic_filepath][4] == row["sub_title"]
             )
         episode_table[comic_filepath] = (
             int(row["chapter_id"]),
             int(row["section_id"]),
             int(row["id"]),
-            row["title"],
+            title_wrapper(row["title"]),
             row["sub_title"],
         )
         episode_id_table[int(row["id"])] = comic_filepath
@@ -326,7 +332,7 @@ with open(os.path.join(dir_to_data, "CharacterEpisodeTable.csv")) as csvfile:
         chapter_id = -1
         section_id = -(10000000 - int(row["unit_id"]))
         episode_id = -(10000000 - int(row["id"]))
-        title = unit_table[int(row["unit_id"])] + "的衣装解放"
+        title = title_wrapper(unit_table[int(row["unit_id"])] + "的衣装解放")
         subtitle = ""
         section_table[section_id] = (chapter_id, title, subtitle)
         section_kanban_info[section_id] = chara_chapter_table[int(row["unit_id"])]
@@ -349,7 +355,7 @@ with open(os.path.join(dir_to_data, "TowerTable.csv")) as csvfile:
         chapter_id = -2
         section_id = -(20000000 - int(row["floor"]))
         episode_id = -(20000000 - int(row["id"]))
-        title = row["title"]
+        title = title_wrapper(row["title"])
         subtitle = row["comic_title"]
         section_table[section_id] = (chapter_id, title, subtitle)
         section_kanban_info[section_id] = (100303, -2)
@@ -398,7 +404,7 @@ with open(os.path.join(dir_to_data, "RelicQuestTable.csv")) as csvfile:
         chapter_id = -3
         section_id = -(30000000 - display_order)
         episode_id = -(30000000 - int(row["id"]))
-        title = row["title"]
+        title = title_wrapper(row["title"])
         subtitle = "相关角色: " + unit_table[int(row["id"][:-2])]
         while section_id in section_table:
             section_id += 1
@@ -638,6 +644,8 @@ with open(
     "w",
     encoding="utf-8",
 ) as comic_pages_json:
+    for k in output_json_data.keys():
+        assert "[" not in k and "]" not in k
     json.dump(output_json_data, comic_pages_json, ensure_ascii=False, indent=4)
 
 catagory_data = {}
@@ -651,6 +659,8 @@ for catagory_name, chapter_list in catagory_pages.items():
 with open(
     os.path.join("./tracking_files", "catagory_pages.json"), "w", encoding="utf-8"
 ) as json_file:
+    for k in catagory_data.keys():
+        assert "[" not in k and "]" not in k
     json.dump(catagory_data, json_file, ensure_ascii=False, indent=4)
 
 
@@ -705,6 +715,8 @@ for chapter_id, section_list in chapter_pages.items():
 with open(
     os.path.join("./tracking_files", "chapter_pages.json"), "w", encoding="utf-8"
 ) as json_file:
+    for k in chapter_data.keys():
+        assert "[" not in k and "]" not in k
     json.dump(chapter_data, json_file, ensure_ascii=False, indent=4)
 
 section_data = {}
@@ -781,4 +793,6 @@ for section_id, episode_list in section_pages.items():
 with open(
     os.path.join("./tracking_files", "section_pages.json"), "w", encoding="utf-8"
 ) as json_file:
+    for k in section_data.keys():
+        assert "[" not in k and "]" not in k
     json.dump(section_data, json_file, ensure_ascii=False, indent=4)
