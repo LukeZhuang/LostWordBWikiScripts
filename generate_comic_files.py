@@ -697,16 +697,24 @@ for chapter_id, section_list in chapter_pages.items():
         content += "}}\n"
         content += "{{折叠面板|内容结束}}\n"
     if chapter_id == -1:
-        content += "<div class=\"units-grid\">\n"
+        content += '<div class="units-grid">\n'
         for section_id in sorted(section_list):
             cur_unit_id = 10000000 + section_id
             section_name = section_table[section_id][1]
-            content += "<div class=\"unit-wrapper\">\n"
-            content += "<div class=\"unit-img-wrapper\">\n"
-            content += "[[文件:S" + str(cur_unit_id) + "01.png|60px|link=" + unit_table[cur_unit_id] + "]]\n"
+            content += '<div class="unit-wrapper">\n'
+            content += '<div class="unit-img-wrapper">\n'
+            content += (
+                "[[文件:S"
+                + str(cur_unit_id)
+                + "01.png|60px|link=章节："
+                + section_name
+                + "]]\n"
+            )
             content += "</div>\n"
-            content += "<div class=\"unit-name-wrapper\">\n"
-            content += "[[章节：" + section_name + "|" + unit_short_name[cur_unit_id] + "]]\n"
+            content += '<div class="unit-name-wrapper">\n'
+            content += (
+                "[[章节：" + section_name + "|" + unit_short_name[cur_unit_id] + "]]\n"
+            )
             content += "</div>\n"
             content += "</div>\n"
         content += "</div>\n"
