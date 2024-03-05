@@ -8,11 +8,33 @@ import csv
 import json
 import os
 import re
+import shutil
 import sys
 
 
 dir_to_jsons = sys.argv[1]
 dir_to_data = sys.argv[2]
+
+if os.path.exists(os.path.join("./tracking_files", "catagory_pages.json")):
+    shutil.copyfile(
+        os.path.join("./tracking_files", "catagory_pages.json"),
+        os.path.join("./local_files", "old_catagory_pages.json"),
+    )
+if os.path.exists(os.path.join("./tracking_files", "chapter_pages.json")):
+    shutil.copyfile(
+        os.path.join("./tracking_files", "chapter_pages.json"),
+        os.path.join("./local_files", "old_chapter_pages.json"),
+    )
+if os.path.exists(os.path.join("./tracking_files", "section_pages.json")):
+    shutil.copyfile(
+        os.path.join("./tracking_files", "section_pages.json"),
+        os.path.join("./local_files", "old_section_pages.json"),
+    )
+if os.path.exists(os.path.join("./tracking_files", "comic_pages.json")):
+    shutil.copyfile(
+        os.path.join("./tracking_files", "comic_pages.json"),
+        os.path.join("./local_files", "old_comic_pages.json"),
+    )
 
 
 def wrap(text: str) -> str:
@@ -664,11 +686,11 @@ with open(
     json.dump(catagory_data, json_file, ensure_ascii=False, indent=4)
 
 
-chapter_uniq_id = 10  # used in fold-box
 chapter_data = {}
 for chapter_id, section_list in chapter_pages.items():
     d = {}
     content = ""
+    chapter_uniq_id = (chapter_id + 1000000) * 10
     fold_id1 = str(chapter_uniq_id + 1)
     fold_id2 = str(chapter_uniq_id + 2)
     content += "{{#Widget:ChapterSectionDisplay}}\n"
@@ -736,7 +758,6 @@ for chapter_id, section_list in chapter_pages.items():
     content += "-------------------------------\n"
     d["content"] = content
     chapter_data["篇章：" + chapter_table[chapter_id]] = d
-    chapter_uniq_id += 10
 with open(
     os.path.join("./tracking_files", "chapter_pages.json"), "w", encoding="utf-8"
 ) as json_file:
@@ -815,6 +836,7 @@ for section_id, episode_list in section_pages.items():
 
     d["content"] = content
     section_data["章节：" + section_table[section_id][1]] = d
+
 with open(
     os.path.join("./tracking_files", "section_pages.json"), "w", encoding="utf-8"
 ) as json_file:
