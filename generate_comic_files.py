@@ -275,7 +275,7 @@ assert 104102 not in costume_table
 costume_table[104102] = ("森近霖之助", "海之家「香霖堂」")
 assert 307201 not in costume_table
 costume_table[307201] = ("上白泽慧音", "吞食历史")
-assert 201801 not in costume_table
+# assert 201801 not in costume_table
 costume_table[201801] = ("八意永琳", "绯苍的贤帝")
 assert 190501 not in costume_table
 costume_table[190501] = ("魅魔", "在久远的梦中听天由命的精神")
@@ -296,6 +296,8 @@ chapter_kanban_info: dict[int, tuple[int, int]] = {}
 with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
+        if int(row["id"]) == 2085:  # 胶囊中的幻想乡改过名，没有意义
+            continue
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -307,6 +309,8 @@ section_kanban_info: dict[int, tuple[int, int]] = {}
 with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
+        if int(row["chapter_id"]) == 2085:
+            continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
             title_wrapper(row["title"]),
@@ -322,6 +326,8 @@ episode_id_table: dict[int, str] = {}
 with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
+        if int(row["chapter_id"]) == 2085:
+            continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
         if not comic_filepath.startswith("daily"):
@@ -527,7 +533,12 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
         page_name_count[page_name] = 1
     else:
         page_name_count[page_name] += 1
-        print("note: " + page_name + " already in the set, append " + str(page_name_count[page_name]))
+        print(
+            "note: "
+            + page_name
+            + " already in the set, append "
+            + str(page_name_count[page_name])
+        )
         page_name += str(page_name_count[page_name])
     output_json_data[page_name] = cur_json_data
     episode_page_name[episode_id] = (title, subtitle, page_name)
