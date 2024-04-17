@@ -271,12 +271,16 @@ with open(os.path.join(dir_to_data, "CostumeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         costume_table[int(row["id"])] = (unit_table[int(row["unit_id"])], row["name"])
-if 104102 not in costume_table:
-    costume_table[104102] = ("森近霖之助", "海之家「香霖堂」")
-if 307201 not in costume_table:
-    costume_table[307201] = ("上白泽慧音", "吞食历史")
-if 201801 not in costume_table:
-    costume_table[201801] = ("八意永琳", "绯苍的贤帝")
+assert 104102 not in costume_table
+costume_table[104102] = ("森近霖之助", "海之家「香霖堂」")
+assert 307201 not in costume_table
+costume_table[307201] = ("上白泽慧音", "吞食历史")
+assert 201801 not in costume_table
+costume_table[201801] = ("八意永琳", "绯苍的贤帝")
+assert 190501 not in costume_table
+costume_table[190501] = ("魅魔", "在久远的梦中听天由命的精神")
+assert 193701 not in costume_table
+costume_table[193701] = ("神绮", "魔界之神")
 
 unit_speech_group_table: dict[int, list[str]] = {}
 with open(os.path.join(dir_to_data, "UnitSpeechTable.csv")) as csvfile:
@@ -460,6 +464,7 @@ section_pages: dict[int, set[int]] = {}
 catagory_pages: dict[str, set[int]] = {}
 episode_page_name: dict[int, tuple[str, str, str]] = {}
 used_image_set: set[str] = set()
+page_name_count: dict[str, int] = {}
 for json_file_name in sorted(os.listdir(dir_to_jsons)):
     episode_name = os.path.splitext(json_file_name)[0]
     output_file_name = os.path.join(output_dir, episode_name + ".txt")
@@ -518,7 +523,12 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
         fo.write("".join(output_lines))
     cur_json_data = {"content": "".join(output_lines), "id": episode_id}
     page_name = catagory + "剧本：" + title
-    assert page_name not in output_json_data
+    if page_name not in page_name_count:
+        page_name_count[page_name] = 1
+    else:
+        page_name_count[page_name] += 1
+        print("note: " + page_name + " already in the set, append " + str(page_name_count[page_name]))
+        page_name += str(page_name_count[page_name])
     output_json_data[page_name] = cur_json_data
     episode_page_name[episode_id] = (title, subtitle, page_name)
 
