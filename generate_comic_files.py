@@ -273,6 +273,8 @@ with open(os.path.join(dir_to_data, "CostumeTable.csv")) as csvfile:
         costume_table[int(row["id"])] = (unit_table[int(row["unit_id"])], row["name"])
 assert 104102 not in costume_table
 costume_table[104102] = ("森近霖之助", "海之家「香霖堂」")
+assert 104103 not in costume_table
+costume_table[104103] = ("森近霖之助", "秘汤特产「香霖堂」")
 assert 307201 not in costume_table
 costume_table[307201] = ("上白泽慧音", "吞食历史")
 # assert 201801 not in costume_table
@@ -298,6 +300,8 @@ with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
     for row in reader:
         if int(row["id"]) == 2085:  # 胶囊中的幻想乡改过名，没有意义
             continue
+        if int(row["id"]) == 2087:  # 犯规解决代理人改过名，没有意义
+            continue
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -310,6 +314,8 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         if int(row["chapter_id"]) == 2085:
+            continue
+        if int(row["chapter_id"]) == 2087:
             continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
@@ -327,6 +333,8 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         if int(row["chapter_id"]) == 2085:
+            continue
+        if int(row["chapter_id"]) == 2087:
             continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
