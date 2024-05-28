@@ -109,6 +109,13 @@ def adjust_text_for_html(text: str) -> str:
     )
 
 
+picture_source = {}
+with open("./PictureSource.csv") as source_csvfile:
+    source_reader = csv.DictReader(source_csvfile)
+    for row in source_reader:
+        picture_source[row["id"]] = row["source"]
+
+
 old_lines = remove_is_show(picture_table_file_old)
 new_lines = remove_is_show(picture_table_file_new)
 # check headers are the same
@@ -208,7 +215,9 @@ for row in reader:
         + correction2_type_str
         + "+"
         + str(correction2_diff),
-        "获取途径": "国服暂无",  # default, need to modify by hand later
+        "获取途径": "国服暂无"
+        if row["id"] not in picture_source
+        else picture_source[row["id"]],
         "特性1": adjust_text_for_html(row["picture_characteristic_text"]),
         "特性2": adjust_text_for_html(row["picture_characteristic_text_max"]),
         "特性1简缩": "",
