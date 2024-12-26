@@ -171,6 +171,7 @@ def process_order(
         "ElseOrder",
         "EndOrder",
         "FadeOrder",
+        "FlipHorizontalUnitOrder",
         "ForeUnitOrder",
         "HeroOrder",
         "IfOrder",
@@ -238,6 +239,8 @@ def get_file_catagory(json_file_name):
         return "记忆遗迹"
     elif json_file_name.startswith("tower"):
         return "红魔塔"
+    elif json_file_name.startswith("yukkuri"):
+        return "油库里"
     else:
         return "其他"
 
@@ -312,6 +315,10 @@ with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
             continue
         if int(row["id"]) == 2109:  # （去除冗余的后一个）乐园的健康烹饪
             continue
+        if int(row["id"]) == 2122:  # （去除冗余的后一个）启蛰的秘神游戏
+            continue
+        if int(row["id"]) == 2129:  # （去除冗余的后一个）三途河
+            continue
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -336,6 +343,10 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2104:
             continue
         if int(row["chapter_id"]) == 2109:
+            continue
+        if int(row["chapter_id"]) == 2122:
+            continue
+        if int(row["chapter_id"]) == 2129:
             continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
@@ -365,6 +376,10 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2104:
             continue
         if int(row["chapter_id"]) == 2109:
+            continue
+        if int(row["chapter_id"]) == 2122:
+            continue
+        if int(row["chapter_id"]) == 2129:
             continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
