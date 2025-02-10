@@ -319,6 +319,10 @@ with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
             continue
         if int(row["id"]) == 2129:  # （去除冗余的后一个）三途河
             continue
+        if int(row["id"]) == 2114:  # （去除冗余的后一个）一年又一年 弹幕家族
+            continue
+        if int(row["id"]) == 2118:  # （去除冗余的后一个）叛逆的微小幻想曲
+            continue
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -347,6 +351,10 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2122:
             continue
         if int(row["chapter_id"]) == 2129:
+            continue
+        if int(row["chapter_id"]) == 2114:
+            continue
+        if int(row["chapter_id"]) == 2118:
             continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
@@ -380,6 +388,10 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2122:
             continue
         if int(row["chapter_id"]) == 2129:
+            continue
+        if int(row["chapter_id"]) == 2114:
+            continue
+        if int(row["chapter_id"]) == 2118:
             continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
