@@ -92,11 +92,25 @@ correction_type_dict = {
 def remove_is_show(file_path: str) -> list[str]:
     output_lines = []
     with open(file_path) as csvfile:
+        dummy_tail = 0
         for line in csvfile:
-            fields = line.strip().split()
+            fields = line.strip().split(",")
             if fields[0] == "id":
-                assert fields[-1] == "is_show"
-            new_line = re.sub(r",(is_show|0|1)$", "", line.strip())
+                if fields[-1] == "is_show":
+                    dummy_tail = 1
+                elif fields[-2] == "is_show":
+                    assert fields[-1] == "dummy1"
+                    dummy_tail = 2
+                else:
+                    assert False
+            if dummy_tail == 1:
+                new_line = re.sub(r",(is_show|0|1)$", "", line.strip())
+            elif dummy_tail == 2:
+                new_line = re.sub(
+                    r",(is_show,dummy1|0,0|0,1|1,0|1,1)$", "", line.strip()
+                )
+            else:
+                assert False
             output_lines.append(new_line)
     return output_lines
 
