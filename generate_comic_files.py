@@ -286,6 +286,8 @@ assert 190501 not in costume_table
 costume_table[190501] = ("魅魔", "在久远的梦中听天由命的精神")
 assert 193701 not in costume_table
 costume_table[193701] = ("神绮", "魔界之神")
+assert 803001 not in costume_table
+costume_table[803001] = ("unknown", "unknown")
 
 unit_speech_group_table: dict[int, list[str]] = {}
 with open(os.path.join(dir_to_data, "UnitSpeechTable.csv")) as csvfile:
@@ -323,6 +325,10 @@ with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
             continue
         if int(row["id"]) == 2118:  # （去除冗余的后一个）叛逆的微小幻想曲
             continue
+        if int(row["id"]) == 2130:  # （去除冗余的后一个）博丽神社学院冒险谭 蕾米定向越野赛
+            continue
+        if int(row["id"]) == 2135:  # （去除冗余的后一个）野兽梦幻沙龙 欢迎来到！
+            continue
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -355,6 +361,10 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2114:
             continue
         if int(row["chapter_id"]) == 2118:
+            continue
+        if int(row["chapter_id"]) == 2130:
+            continue
+        if int(row["chapter_id"]) == 2135:
             continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
@@ -392,6 +402,10 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2114:
             continue
         if int(row["chapter_id"]) == 2118:
+            continue
+        if int(row["chapter_id"]) == 2130:
+            continue
+        if int(row["chapter_id"]) == 2135:
             continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
