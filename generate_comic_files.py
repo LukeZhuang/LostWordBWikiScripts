@@ -288,6 +288,10 @@ assert 193701 not in costume_table
 costume_table[193701] = ("神绮", "魔界之神")
 assert 803001 not in costume_table
 costume_table[803001] = ("unknown", "unknown")
+assert 700401 not in costume_table
+costume_table[700401] = ("unknown", "unknown")
+assert 1003201 not in costume_table
+costume_table[1003201] = ("unknown", "unknown")
 
 unit_speech_group_table: dict[int, list[str]] = {}
 with open(os.path.join(dir_to_data, "UnitSpeechTable.csv")) as csvfile:
@@ -329,6 +333,14 @@ with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
             continue
         if int(row["id"]) == 2135:  # （去除冗余的后一个）野兽梦幻沙龙 欢迎来到！
             continue
+        if int(row["id"]) == 2139:  # （去除冗余的后一个）
+            continue
+        if int(row["id"]) == 2144:  # （去除冗余的后一个）
+            continue
+        if int(row["id"]) == 2149:  # （去除冗余的后一个）
+            continue
+        if int(row["id"]) == 2152:  # （去除冗余的后一个）
+            continue
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -365,6 +377,14 @@ with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2130:
             continue
         if int(row["chapter_id"]) == 2135:
+            continue
+        if int(row["chapter_id"]) == 2139:
+            continue
+        if int(row["chapter_id"]) == 2144:
+            continue
+        if int(row["chapter_id"]) == 2149:
+            continue
+        if int(row["chapter_id"]) == 2152:
             continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
@@ -406,6 +426,14 @@ with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
         if int(row["chapter_id"]) == 2130:
             continue
         if int(row["chapter_id"]) == 2135:
+            continue
+        if int(row["chapter_id"]) == 2139:
+            continue
+        if int(row["chapter_id"]) == 2144:
+            continue
+        if int(row["chapter_id"]) == 2149:
+            continue
+        if int(row["chapter_id"]) == 2152:
             continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
