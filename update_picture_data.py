@@ -175,7 +175,7 @@ for row in reader:
             debuffs_str += buff_dict[subtypes[j]] + "、"
         if int(effects[j]) in [3, 4, 5, 17]:
             other_effects_str += other_dict[effects[j]] + "、"
-        if int(effects[j]) in [15]:
+        if int(effects[j]) in [15] and int(subtypes[j]) != 0:
             bullet_types_str += bullet_dict[subtypes[j]] + "、"
         if int(effects[j]) in [16]:
             element_types_str += element_dict[subtypes[j]] + "、"
