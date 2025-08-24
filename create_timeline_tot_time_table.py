@@ -5,8 +5,8 @@ import re
 import sys
 
 dir_to_jsons = sys.argv[1]
-absent_file = os.path.join("./local_files", "timeline_duration_absent.csv")
-#assert os.path.exists(absent_file)
+absent_file = os.path.join("./tracking_files", "time_duration_absent.csv")
+assert os.path.exists(absent_file)
 
 # We will create two csv files.
 # One without id and absent_units, and is kept tracking in git
@@ -52,6 +52,20 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
     time3 = time2 / 2
     all_hit_check_info.append((unit_id, barrage_id, time1, time2, time3))
 
+# add absent unit hit check order info
+with open(absent_file) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        all_hit_check_info.append(
+            (
+                int(row["unit_id"]),
+                int(row["barrage_id"]),
+                float(row["time1"]),
+                float(row["time2"]),
+                float(row["time3"]),
+            )
+        )
+
 with open(output_noid_path, "w") as fo_noid:
     fo_noid.write("unit_id,barrage_id,time1,time2,time3\n")
     for hit_check_info in sorted(all_hit_check_info):
@@ -68,19 +82,6 @@ with open(output_noid_path, "w") as fo_noid:
             + ("%.2f" % time3)
             + "\n"
         )
-
-    # add absent unit hit check order info
-    #with open(absent_file) as csvfile:
-    #    reader = csv.DictReader(csvfile)
-    #    for row in reader:
-    #        all_hit_check_info.append(
-    #            (
-    #                int(row["unit_id"]),
-    #                int(row["barrage_id"]),
-    #                int(row["boost_id"]),
-    #                row["hit_check_order"],
-    #            )
-    #        )
 
 with open(output_path, "w") as fo:
     fo.write("id,unit_id,barrage_id,time1,time2,time3\n")
