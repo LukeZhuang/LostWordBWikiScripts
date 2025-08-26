@@ -33,6 +33,19 @@ for json_file_name in sorted(os.listdir(dir_to_jsons)):
             hit_check_order += str(order_detail["m_mgznid"] + 1)
     all_hit_check_info.append((unit_id, barrage_id, boost_id, hit_check_order))
 
+# add absent unit hit check order info
+with open(absent_file) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        all_hit_check_info.append(
+            (
+                int(row["unit_id"]),
+                int(row["barrage_id"]),
+                int(row["boost_id"]),
+                row["hit_check_order"],
+            )
+        )
+
 with open(output_noid_path, "w") as fo_noid:
     fo_noid.write("unit_id,barrage_id,boost_id,hit_check_order\n")
     for hit_check_info in sorted(all_hit_check_info):
@@ -47,19 +60,6 @@ with open(output_noid_path, "w") as fo_noid:
             + (hit_check_order if len(hit_check_order) > 0 else "(empty)")
             + "\n"
         )
-
-    # add absent unit hit check order info
-    with open(absent_file) as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            all_hit_check_info.append(
-                (
-                    int(row["unit_id"]),
-                    int(row["barrage_id"]),
-                    int(row["boost_id"]),
-                    row["hit_check_order"],
-                )
-            )
 
 with open(output_path, "w") as fo:
     fo.write("id,unit_id,barrage_id,boost_id,hit_check_order\n")
