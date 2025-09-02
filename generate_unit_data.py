@@ -747,7 +747,7 @@ def generate_costume_info(characters, c_id):
         costume_data = costume_datas[costume_id]
         if int(costume_data["file_id"]) == 1:
             characters["初始皮肤名称"] = costume_data["name"]
-            characters["初始皮肤描述"] = costume_data["description"].replace("\n", "<br>")
+            characters["初始皮肤描述"] = costume_data["description"]
         else:
             if characters["皮肤编号组"] != "":
                 characters["皮肤编号组"] += "、"
@@ -757,7 +757,7 @@ def generate_costume_info(characters, c_id):
                 characters["皮肤描述组"] += "/"
             characters["皮肤编号组"] += str(costume_data["file_id"]).zfill(2)
             characters["皮肤名称组"] += costume_data["name"]
-            characters["皮肤描述组"] += costume_data["description"].replace("\n", "<br>")
+            characters["皮肤描述组"] += costume_data["description"]
 
 
 def generate_time_duration(characters, c_id):
@@ -846,8 +846,8 @@ def generate_overall_elements(characters, c_id):
 
 
 def generate_friendship_characters(characters, c_id):
-    #characters["羁绊角色"] = ""
-    #characters["羁绊角色编号"] = ""
+    # characters["羁绊角色"] = ""
+    # characters["羁绊角色编号"] = ""
     if c_id not in person_relations:
         return
     person_relation = person_relations[c_id]
@@ -862,7 +862,7 @@ def generate_friendship_characters(characters, c_id):
 
 def generate_rank_promote(characters, c_id):
     name_list = ["体力", "阳攻", "阳防", "阴攻", "阴防", "速度"]
-    #for rank in range(5):
+    # for rank in range(5):
     #    for slot in range(6):
     #        item_name_str = "升格" + str(rank + 1) + name_list[slot] + "所需材料"
     #        item_num_str = item_name_str + "数量"
@@ -903,18 +903,16 @@ def generate_voice(characters, c_id):
         + [i for i in range(41, 45)]
         + [i for i in range(56, 60)]
     )
-    #for v_type in display_voice_types:
+    # for v_type in display_voice_types:
     #    characters[VoiceCategory[v_type]] = ""
     if c_id not in voices:
         return
     for v_type in display_voice_types:
-        characters[VoiceCategory[v_type]] = (
-            voices[c_id][v_type]
-        )
+        characters[VoiceCategory[v_type]] = voices[c_id][v_type]
 
 
 def generate_cv_info(characters, c_id):
-    #for cv_id in range(1, 4):
+    # for cv_id in range(1, 4):
     #    characters["角色声音" + str(cv_id)] = ""
     #    characters["角色CV" + str(cv_id)] = ""
     if c_id not in voice_sets:
@@ -925,6 +923,12 @@ def generate_cv_info(characters, c_id):
         sound, cv_name = voice_sets[c_id][cv_id]
         characters["角色声音" + str(cv_id)] = sound
         characters["角色CV" + str(cv_id)] = cv_name
+
+
+def fixup_return_line(characters):
+    for key in characters:
+        if isinstance(characters[key], str):
+            characters[key] = characters[key].replace("\n", "<br>")
 
 
 characters_json = {}
@@ -976,7 +980,7 @@ for key in tqdm(unit_datas):
     # 能力描述
     ability_data = ability_datas[int(unit_data["ability_id"])]
     c_ability_name = ability_data["name"]
-    c_ability_description = ability_data["description"].replace("\n", "<br>")
+    c_ability_description = ability_data["description"]
     c_ability_effect_resist = ability_data["resist_ability_description"]
     c_ability_effect_element = ability_data["element_ability_description"]
     c_ability_effect_barrier = ability_data["barrier_ability_description"]
@@ -994,10 +998,9 @@ for key in tqdm(unit_datas):
         c_ability_effect_summary += c_ability_effect_boost + "<br>"
     if c_ability_effect_purge != "":
         c_ability_effect_summary += c_ability_effect_purge + ""
-    c_ability_effect_summary = (
-        c_ability_effect_summary.replace("<color=", "<font color=")
-        .replace("</color>", "</font>")
-    )
+    c_ability_effect_summary = c_ability_effect_summary.replace(
+        "<color=", "<font color="
+    ).replace("</color>", "</font>")
 
     # 结界异常效果（燃烧，冻结，感电，毒雾，黑暗）
     c_ability_abnormal = [0] + [
@@ -1686,6 +1689,7 @@ for key in tqdm(unit_datas):
     generate_cv_info(characters, c_id)
     generate_rank_promote(characters, c_id)
     generate_hit_check_order(characters, c_id)
+    fixup_return_line(characters)
 
     assert page_name not in characters_json
     characters_json[page_name] = characters
