@@ -987,18 +987,18 @@ for key in tqdm(unit_datas):
     c_ability_effect_barrier = ability_data["barrier_ability_description"]
     c_ability_effect_boost = ability_data["boost_ability_description"]
     c_ability_effect_purge = ability_data["purge_ability_description"]
-    c_ability_effect_summary = ""
-    # TODO: FIX!!!
+    c_ability_effect_summary = []
     if c_ability_effect_resist != "":
-        c_ability_effect_summary += c_ability_effect_resist + ""
+        c_ability_effect_summary.append(c_ability_effect_resist)
     if c_ability_effect_element != "":
-        c_ability_effect_summary += c_ability_effect_element + "<br>"
+        c_ability_effect_summary.append(c_ability_effect_element)
     if c_ability_effect_barrier != "":
-        c_ability_effect_summary += c_ability_effect_barrier + "<br>"
+        c_ability_effect_summary.append(c_ability_effect_barrier)
     if c_ability_effect_boost != "":
-        c_ability_effect_summary += c_ability_effect_boost + "<br>"
+        c_ability_effect_summary.append(c_ability_effect_boost)
     if c_ability_effect_purge != "":
-        c_ability_effect_summary += c_ability_effect_purge + ""
+        c_ability_effect_summary.append(c_ability_effect_purge)
+    c_ability_effect_summary = "<br>".join(c_ability_effect_summary)
     c_ability_effect_summary = c_ability_effect_summary.replace(
         "<color=", "<font color="
     ).replace("</color>", "</font>")
