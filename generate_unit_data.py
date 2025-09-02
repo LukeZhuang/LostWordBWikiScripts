@@ -846,8 +846,8 @@ def generate_overall_elements(characters, c_id):
 
 
 def generate_friendship_characters(characters, c_id):
-    # characters["羁绊角色"] = ""
-    # characters["羁绊角色编号"] = ""
+    characters["羁绊角色"] = ""
+    characters["羁绊角色编号"] = ""
     if c_id not in person_relations:
         return
     person_relation = person_relations[c_id]
@@ -862,12 +862,12 @@ def generate_friendship_characters(characters, c_id):
 
 def generate_rank_promote(characters, c_id):
     name_list = ["体力", "阳攻", "阳防", "阴攻", "阴防", "速度"]
-    # for rank in range(5):
-    #    for slot in range(6):
-    #        item_name_str = "升格" + str(rank + 1) + name_list[slot] + "所需材料"
-    #        item_num_str = item_name_str + "数量"
-    #        characters[item_num_str] = ""
-    #        characters[item_name_str] = ""
+    for rank in range(5):
+        for slot in range(6):
+            item_name_str = "升格" + str(rank + 1) + name_list[slot] + "所需材料"
+            item_num_str = item_name_str + "数量"
+            characters[item_num_str] = ""
+            characters[item_name_str] = ""
     if c_id not in rank_promotes:
         return
     for rank in range(5):
@@ -898,13 +898,14 @@ def generate_rank_promote(characters, c_id):
 
 
 def generate_voice(characters, c_id):
-    display_voice_types = (
-        [i for i in range(1, 29)]
-        + [i for i in range(41, 45)]
-        + [i for i in range(56, 60)]
-    )
-    # for v_type in display_voice_types:
-    #    characters[VoiceCategory[v_type]] = ""
+    display_voice_types = [i for i in range(1, 66)]
+    # display_voice_types = (
+    #     [i for i in range(1, 29)]
+    #     + [i for i in range(41, 45)]
+    #     + [i for i in range(56, 60)]
+    # )
+    for v_type in display_voice_types:
+        characters[VoiceCategory[v_type]] = ""
     if c_id not in voices:
         return
     for v_type in display_voice_types:
@@ -912,9 +913,9 @@ def generate_voice(characters, c_id):
 
 
 def generate_cv_info(characters, c_id):
-    # for cv_id in range(1, 4):
-    #    characters["角色声音" + str(cv_id)] = ""
-    #    characters["角色CV" + str(cv_id)] = ""
+    for cv_id in range(1, 4):
+        characters["角色声音" + str(cv_id)] = ""
+        characters["角色CV" + str(cv_id)] = ""
     if c_id not in voice_sets:
         return
     for cv_id in range(1, 4):
