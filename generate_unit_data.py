@@ -16,12 +16,11 @@ from tqdm import tqdm
 
 dir_to_data = sys.argv[1]
 
-# TODO: FIX!!!
-# if os.path.exists(os.path.join("./tracking_files", "characters_wikidata.json")):
-#    shutil.copyfile(
-#        os.path.join("./tracking_files", "characters_wikidata.json"),
-#        os.path.join("./local_files", "old_characters_wikidata.json"),
-#    )
+if os.path.exists(os.path.join("./tracking_files", "characters_wikidata.json")):
+    shutil.copyfile(
+        os.path.join("./tracking_files", "characters_wikidata.json"),
+        os.path.join("./local_files", "old_characters_wikidata.json"),
+    )
 
 effect_icon_size = 20
 Elements = {1: "日", 2: "月", 3: "火", 4: "水", 5: "木", 6: "金", 7: "土", 8: "星", 9: "无"}
