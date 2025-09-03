@@ -897,12 +897,12 @@ def generate_rank_promote(characters, c_id):
 
 
 def generate_voice(characters, c_id):
-    display_voice_types = [i for i in range(1, 66)]
-    # display_voice_types = (
-    #     [i for i in range(1, 29)]
-    #     + [i for i in range(41, 45)]
-    #     + [i for i in range(56, 60)]
-    # )
+    #display_voice_types = [i for i in range(1, 66)]
+    display_voice_types = (
+        [i for i in range(1, 29)]
+        + [i for i in range(41, 45)]
+        + [i for i in range(56, 60)]
+    )
     for v_type in display_voice_types:
         characters[VoiceCategory[v_type]] = ""
     if c_id not in voices:
