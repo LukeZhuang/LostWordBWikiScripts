@@ -304,43 +304,24 @@ unit_speech_group_table[-2] = ["欢迎来到红魔塔"]
 
 chapter_table: dict[int, str] = {}
 chapter_kanban_info: dict[int, tuple[int, int]] = {}
+chapter_name_to_id: dict[str, int] = {}
+same_chapters = set()
+same_chapters.add(2085)  # 胶囊中的幻想乡改过名
+same_chapters.add(2087)  # 犯规解决代理人改过名
+same_chapters.add(2098)  # 弹幕小歌剧改过名
+same_chapters.add(2109)  # 乐园的健康烹饪
 with open(os.path.join(dir_to_data, "ChapterTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        if int(row["id"]) == 2085:  # 胶囊中的幻想乡改过名，没有意义
+        cpt_title = row["title"]
+        cpt_id = int(row["id"])
+        if cpt_id in same_chapters:
             continue
-        if int(row["id"]) == 2087:  # 犯规解决代理人改过名，没有意义
+        if cpt_title in chapter_name_to_id:
+            print("already exists:", cpt_id, cpt_title)
+            same_chapters.add(cpt_id)
             continue
-        if int(row["id"]) == 2093:  # 黑衣的摄影师改过名，没有意义
-            continue
-        if int(row["id"]) == 2098:  # （去除冗余的后一个）弹幕小歌剧
-            continue
-        if int(row["id"]) == 2101:  # （去除冗余的后一个）幽现的狙击手
-            continue
-        if int(row["id"]) == 2104:  # （去除冗余的后一个）复苏的甜味
-            continue
-        if int(row["id"]) == 2109:  # （去除冗余的后一个）乐园的健康烹饪
-            continue
-        if int(row["id"]) == 2122:  # （去除冗余的后一个）启蛰的秘神游戏
-            continue
-        if int(row["id"]) == 2129:  # （去除冗余的后一个）三途河
-            continue
-        if int(row["id"]) == 2114:  # （去除冗余的后一个）一年又一年 弹幕家族
-            continue
-        if int(row["id"]) == 2118:  # （去除冗余的后一个）叛逆的微小幻想曲
-            continue
-        if int(row["id"]) == 2130:  # （去除冗余的后一个）博丽神社学院冒险谭 蕾米定向越野赛
-            continue
-        if int(row["id"]) == 2135:  # （去除冗余的后一个）野兽梦幻沙龙 欢迎来到！
-            continue
-        if int(row["id"]) == 2139:  # （去除冗余的后一个）
-            continue
-        if int(row["id"]) == 2144:  # （去除冗余的后一个）
-            continue
-        if int(row["id"]) == 2149:  # （去除冗余的后一个）
-            continue
-        if int(row["id"]) == 2152:  # （去除冗余的后一个）
-            continue
+        chapter_name_to_id[cpt_title] = cpt_id
         chapter_table[int(row["id"])] = title_wrapper(row["title"])
         chapter_kanban_info[int(row["id"])] = (
             int(row["costume_id"]),
@@ -352,39 +333,8 @@ section_kanban_info: dict[int, tuple[int, int]] = {}
 with open(os.path.join(dir_to_data, "SectionTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        if int(row["chapter_id"]) == 2085:
-            continue
-        if int(row["chapter_id"]) == 2087:
-            continue
-        if int(row["chapter_id"]) == 2093:
-            continue
-        if int(row["chapter_id"]) == 2098:
-            continue
-        if int(row["chapter_id"]) == 2101:
-            continue
-        if int(row["chapter_id"]) == 2104:
-            continue
-        if int(row["chapter_id"]) == 2109:
-            continue
-        if int(row["chapter_id"]) == 2122:
-            continue
-        if int(row["chapter_id"]) == 2129:
-            continue
-        if int(row["chapter_id"]) == 2114:
-            continue
-        if int(row["chapter_id"]) == 2118:
-            continue
-        if int(row["chapter_id"]) == 2130:
-            continue
-        if int(row["chapter_id"]) == 2135:
-            continue
-        if int(row["chapter_id"]) == 2139:
-            continue
-        if int(row["chapter_id"]) == 2144:
-            continue
-        if int(row["chapter_id"]) == 2149:
-            continue
-        if int(row["chapter_id"]) == 2152:
+        cpt_id = int(row["chapter_id"])
+        if cpt_id in same_chapters:
             continue
         section_table[int(row["id"])] = (
             int(row["chapter_id"]),
@@ -401,39 +351,8 @@ episode_id_table: dict[int, str] = {}
 with open(os.path.join(dir_to_data, "EpisodeTable.csv")) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        if int(row["chapter_id"]) == 2085:
-            continue
-        if int(row["chapter_id"]) == 2087:
-            continue
-        if int(row["chapter_id"]) == 2093:
-            continue
-        if int(row["chapter_id"]) == 2098:
-            continue
-        if int(row["chapter_id"]) == 2101:
-            continue
-        if int(row["chapter_id"]) == 2104:
-            continue
-        if int(row["chapter_id"]) == 2109:
-            continue
-        if int(row["chapter_id"]) == 2122:
-            continue
-        if int(row["chapter_id"]) == 2129:
-            continue
-        if int(row["chapter_id"]) == 2114:
-            continue
-        if int(row["chapter_id"]) == 2118:
-            continue
-        if int(row["chapter_id"]) == 2130:
-            continue
-        if int(row["chapter_id"]) == 2135:
-            continue
-        if int(row["chapter_id"]) == 2139:
-            continue
-        if int(row["chapter_id"]) == 2144:
-            continue
-        if int(row["chapter_id"]) == 2149:
-            continue
-        if int(row["chapter_id"]) == 2152:
+        cpt_id = int(row["chapter_id"])
+        if cpt_id in same_chapters:
             continue
         comic_filepath = "-".join(row["comic_filepath"].lower().split("/"))
         comic_filepath = extract_comic_filepath(comic_filepath)
