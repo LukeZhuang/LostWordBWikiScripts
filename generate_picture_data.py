@@ -82,6 +82,10 @@ def adjust_text_for_html(text: str) -> str:
     )
 
 
+def adjust_page_name(text: str) -> str:
+    return text.replace("#", "＃")
+
+
 sources = set(
     ["常驻祈愿", "限定祈愿", "主线&秘封", "活动", "复灵本", "限量绘卷", "高难本掉落", "特殊兑换", "命运掉落", "永远战线"]
 )
@@ -99,6 +103,7 @@ with open(picture_table_file) as jsonfile:
         row = json.loads(line.strip())
 
         name = row["name"]
+        page_name = adjust_page_name(name)
 
         buffs_str = ""
         debuffs_str = ""
@@ -151,6 +156,7 @@ with open(picture_table_file) as jsonfile:
 
         picture_dict = {
             "名称": name,
+            "页面名": page_name,
             "编号": row["id"],
             "类型": picture_type_dict[row["type"]],
             "稀有度": row["rare"],
@@ -195,7 +201,7 @@ with open(picture_table_file) as jsonfile:
             "解说4": adjust_text_for_html(row["flavor_text4"]),
             "解说5": adjust_text_for_html(row["flavor_text5"]),
         }
-        pictures_json[name] = picture_dict
+        pictures_json[page_name] = picture_dict
 
 output_file_path = os.path.join("tracking_files", "pictures_wikidata.json")
 with open(output_file_path, "w", encoding="utf-8") as fo:
