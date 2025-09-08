@@ -13,5 +13,5 @@ for key in data:
 
 text += '}}'
 
-with open('unit_wiki_template.txt', 'w', encoding='utf-8') as f:
+with open('batch_content_for_units.txt', 'w', encoding='utf-8') as f:
     f.write(text)
