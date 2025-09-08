@@ -1,9 +1,17 @@
 import csv
 import json
 import os
+import shutil
 import sys
 
 picture_table_file = sys.argv[1]
+
+if os.path.exists(os.path.join("./tracking_files", "pictures_wikidata.json")):
+    shutil.copyfile(
+        os.path.join("./tracking_files", "pictures_wikidata.json"),
+        os.path.join("./local_files", "old_pictures_wikidata.json"),
+    )
+
 
 range_dict = {0: "自身", 1: "自身", 2: "己方全体", 3: "敌方单体", 4: "敌方全体"}
 role_dict = {
