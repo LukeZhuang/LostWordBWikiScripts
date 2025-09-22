@@ -39,6 +39,7 @@ BulletCategory = {
 }
 Roles = {1: "防御式", 2: "支援式", 3: "回复式", 4: "干扰式", 5: "攻击式", 6: "技巧式", 7: "速攻式", 8: "破坏式"}
 RareCategory = {
+    0: "未知",
     1: "常驻/限定",
     2: "超限定",
     3: "Relic限定",
@@ -72,11 +73,20 @@ BuffEffectCategory = {
     11: "会心回避",
     12: "仇恨",
     103: "阳攻阴攻",
+    105: "阳攻速度",
     106: "阳攻命中",
     108: "阳攻会心攻击",
     110: "阳攻会心命中",
+    112: "阳攻仇恨",
+    205: "阳防速度",
     211: "阳防会心回避",
+    305: "阳攻速度",
     308: "阴攻会心攻击",
+    310: "阴攻会心命中",
+    406: "阴防命中",
+    408: "阴防会心攻击",
+    711: "回避会心回避",
+    810: "会心攻击会心命中",
 }
 AbnormalBreakCategory = {12: "焚灭", 13: "融冰", 14: "放电", 15: "猛毒", 16: "闪光"}
 VoiceCategory = {
@@ -170,7 +180,7 @@ allowed_chars = (
     [chr(i) for i in range(ord("A"), ord("Z") + 1)]
     + [chr(i) for i in range(ord("a"), ord("z") + 1)]
     + [chr(i) for i in range(ord("0"), ord("9") + 1)]
-    + [".", "&", "#", ">", "=", "<", "$"]
+    + [".", "&", "#", ">", "=", "<", "$", "○", "∫", "'", "-", ";"]
 )
 
 
@@ -187,6 +197,9 @@ def replace_mark(s):
     new_s = new_s.replace("=", "＝")
     new_s = new_s.replace("<", "＜")
     new_s = new_s.replace("$", "＄")
+    new_s = new_s.replace("'", "‘")
+    new_s = new_s.replace("-", "－")
+    new_s = new_s.replace(";", "；")
     return new_s
 
 
@@ -267,8 +280,9 @@ for key in unit_datas:
         continue
     c_id = int(unit_data["id"])
     p_id = int(unit_data["person_id"])
-    assert p_id not in person_id_to_id
-    person_id_to_id[p_id] = c_id
+    if p_id not in person_id_to_id:
+        person_id_to_id[p_id] = []
+    person_id_to_id[p_id].append(c_id)
 
 unit_races = {}
 for key in unit_race_datas:
@@ -301,10 +315,12 @@ for key in person_relation_datas:
     p_id2 = int(person_relation_data["target_person_id"])
     if p_id1 not in person_id_to_id or p_id2 not in person_id_to_id:
         continue
-    c_id1 = person_id_to_id[p_id1]
-    c_id2 = person_id_to_id[p_id2]
-    if c_id1 not in person_relations:
-        person_relations[c_id1] = []
+    c_ids1 = person_id_to_id[p_id1]
+    c_ids2 = person_id_to_id[p_id2]
+    for c_id1 in c_ids1:
+        for c_id2 in c_ids2:
+            if c_id1 not in person_relations:
+                person_relations[c_id1] = []
     person_relations[c_id1].append(c_id2)
 
 rank_promotes = {}
@@ -698,12 +714,20 @@ def simplify_skill_effect(
         else:
             skill_effect_raise_exception()
         result = ""
-        if se_subtype == 5:
+        if se_subtype == 2:
+            result += "自身阳防转我方阳攻"
+        elif se_subtype == 3:
+            result += "自身阴攻转我方阳攻"
+        elif se_subtype == 5:
             result += "自身速力转我方阳攻"
         elif se_subtype == 14:
             result += "自身阴防转我方阴攻"
+        elif se_subtype == 23:
+            result += "自身阴攻转我方速度"
         else:
             skill_effect_raise_exception()
+    elif se_type == 59:  # 特定人数
+        result += "特定人数"
     else:
         skill_effect_raise_exception()
     return result
@@ -725,6 +749,9 @@ def get_rare_for_wiki(unit_data):
     elif int(c_id) >= 50000 and int(c_id) < 60000:
         # 油库里
         return 0.5
+    elif int(c_id) == 15037 or int(c_id) == 27002 or int(c_id) == 28001:
+        # 未知
+        return 0
     elif c_rare == 3 or c_rare == 4:
         # Epic放Relic前面
         return 7 - c_rare
