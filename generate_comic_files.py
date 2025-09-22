@@ -278,7 +278,7 @@ assert 104102 not in costume_table
 costume_table[104102] = ("森近霖之助", "海之家「香霖堂」")
 assert 104103 not in costume_table
 costume_table[104103] = ("森近霖之助", "秘汤特产「香霖堂」")
-assert 307201 not in costume_table
+# assert 307201 not in costume_table
 costume_table[307201] = ("上白泽慧音", "吞食历史")
 # assert 201801 not in costume_table
 costume_table[201801] = ("八意永琳", "绯苍的贤帝")
