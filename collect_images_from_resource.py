@@ -81,11 +81,14 @@ def parse_file(file_name, dest_dir, category, sub_category, prefix):
 
 
 for line in open(git_status_file):
-    parse_file(line.strip(), output_dir, "UnitChange", "AltCostume", "CH")
-    parse_file(line.strip(), output_dir, "UnitChange", "Original", "CH")
-    parse_file(line.strip(), output_dir, "UnitFullBody", "AltCostume", "G")
-    parse_file(line.strip(), output_dir, "UnitFullBody", "Original", "G")
-    parse_file(line.strip(), output_dir, "UnitShotIcon", "Original", "SHB")
-    parse_file(line.strip(), output_dir, "UnitShotIcon", "Original", "SPB")
-    parse_file(line.strip(), output_dir, "UnitSquare", "AltCostume", "S")
-    parse_file(line.strip(), output_dir, "UnitSquare", "Original", "S")
+    l = line.strip()
+    if "modified:" in line:
+        l = l.replace("modified:", "").strip()
+    parse_file(l, output_dir, "UnitChange", "AltCostume", "CH")
+    parse_file(l, output_dir, "UnitChange", "Original", "CH")
+    parse_file(l, output_dir, "UnitFullBody", "AltCostume", "G")
+    parse_file(l, output_dir, "UnitFullBody", "Original", "G")
+    parse_file(l, output_dir, "UnitShotIcon", "Original", "SHB")
+    parse_file(l, output_dir, "UnitShotIcon", "Original", "SPB")
+    parse_file(l, output_dir, "UnitSquare", "AltCostume", "S")
+    parse_file(l, output_dir, "UnitSquare", "Original", "S")
