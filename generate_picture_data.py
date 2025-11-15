@@ -95,7 +95,7 @@ def adjust_page_name(text: str) -> str:
 
 
 sources = set(
-    ["常驻祈愿", "限定祈愿", "主线&秘封", "活动", "复灵本", "限量绘卷", "高难本掉落", "特殊兑换", "命运掉落", "永远战线"]
+    ["常驻祈愿", "限定祈愿", "主线&秘封", "活动", "复灵本", "限量绘卷", "高难本掉落", "特殊兑换", "命运掉落", "永远战线", "复灵祭绘马"]
 )
 picture_source = {}
 with open("./PictureSource.csv") as source_csvfile:
