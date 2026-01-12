@@ -79,14 +79,20 @@ BuffEffectCategory = {
     110: "阳攻会心命中",
     112: "阳攻仇恨",
     205: "阳防速度",
+    209: "阳防会心防御",
     211: "阳防会心回避",
+    304: "阴攻阴防",
     305: "阳攻速度",
+    306: "阳攻命中",
     308: "阴攻会心攻击",
     310: "阴攻会心命中",
+    405: "阴防速度",
     406: "阴防命中",
+    407: "阴防回避",
     408: "阴防会心攻击",
     711: "回避会心回避",
     810: "会心攻击会心命中",
+    911: "会心防御会心回避",
 }
 AbnormalBreakCategory = {12: "焚灭", 13: "融冰", 14: "放电", 15: "猛毒", 16: "闪光"}
 VoiceCategory = {
@@ -180,12 +186,14 @@ allowed_chars = (
     [chr(i) for i in range(ord("A"), ord("Z") + 1)]
     + [chr(i) for i in range(ord("a"), ord("z") + 1)]
     + [chr(i) for i in range(ord("0"), ord("9") + 1)]
-    + [".", "&", "#", ">", "=", "<", "$", "○", "∫", "'", "-", ";"]
+    + [".", "&", "#", ">", "=", "<", "$", "○", "∫", "'", "-", ";", "≦", "≪"]
 )
 
 
 def check_chars(c_mark):
     for c in c_mark:
+        if c not in allowed_chars:
+            print(c_mark)
         assert c in allowed_chars
 
 
@@ -200,6 +208,8 @@ def replace_mark(s):
     new_s = new_s.replace("'", "‘")
     new_s = new_s.replace("-", "－")
     new_s = new_s.replace(";", "；")
+    new_s = new_s.replace("≦", "≦")
+    new_s = new_s.replace("≪", "≪")
     return new_s
 
 
@@ -697,6 +707,16 @@ def simplify_skill_effect(
         else:
             skill_effect_raise_exception()
         result += "共鸣"
+    elif se_type == 56:  # 永久buff
+        special = False
+        if se_range == 1:
+            result += "自身"
+        elif se_range == 2:
+            result += "我方"
+        else:
+            skill_effect_raise_exception()
+        result += "永久"
+        result += BuffEffectCategory[se_subtype]
     elif se_type == 57:  # 永久debuff
         if se_range == 3:
             result += "目标"
@@ -720,8 +740,14 @@ def simplify_skill_effect(
             result += "自身阴攻转我方阳攻"
         elif se_subtype == 5:
             result += "自身速力转我方阳攻"
+        elif se_subtype == 6:
+            result += "自身阳攻转我方阳防"
+        elif se_subtype == 13:
+            result += "自身阴攻转我方阴攻"
         elif se_subtype == 14:
             result += "自身阴防转我方阴攻"
+        elif se_subtype == 15:
+            result += "自身速力转我方阴攻"
         elif se_subtype == 23:
             result += "自身阴攻转我方速度"
         else:
@@ -743,13 +769,13 @@ def get_rare_for_wiki(unit_data):
     elif int(c_id) == 7037 or int(c_id) == 7038 or int(c_id) == 7039:
         # 白限
         return 648
-    elif int(c_id) == 11009:
+    elif int(c_id) == 11009 or int(c_id) == 15037 or int(c_id) == 27002 or int(c_id) == 28001:
         # 通行证限定
         return 2.25
     elif int(c_id) >= 50000 and int(c_id) < 60000:
         # 油库里
         return 0.5
-    elif int(c_id) == 15037 or int(c_id) == 27002 or int(c_id) == 28001:
+    elif int(c_id) == 8018 or int(c_id) == 12050 or int(c_id) == 16051 or int(c_id) == 17004 or int(c_id) == 20003:
         # 未知
         return 0
     elif c_rare == 3 or c_rare == 4:
@@ -758,6 +784,10 @@ def get_rare_for_wiki(unit_data):
     elif c_rare == 5:
         # 大限
         return 2.5
+
+    if c_rare == -500:
+        print(c_id)
+        assert False
     return c_rare
 
 

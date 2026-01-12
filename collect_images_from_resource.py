@@ -29,7 +29,10 @@ def apply_watermark(original_image, watermark_image):
 
 
 def parse_file(file_name, dest_dir, category, sub_category, prefix):
-    regex_str = category + "/" + sub_category + "/" + prefix + r"(.*)\.png"
+    if sub_category == "":
+        regex_str = category + "/" + prefix + r"(.*)\.png"
+    else:
+        regex_str = category + "/" + sub_category + "/" + prefix + r"(.*)\.png"
     g = re.findall(regex_str, file_name)
     if len(g) == 0:
         return
@@ -40,7 +43,8 @@ def parse_file(file_name, dest_dir, category, sub_category, prefix):
     new_dest_dir = os.path.join(dest_dir, category)
     if not os.path.exists(new_dest_dir):
         os.mkdir(new_dest_dir)
-    new_dest_dir = os.path.join(new_dest_dir, sub_category)
+    if sub_category != "":
+        new_dest_dir = os.path.join(new_dest_dir, sub_category)
     if not os.path.exists(new_dest_dir):
         os.mkdir(new_dest_dir)
 
@@ -92,3 +96,4 @@ for line in open(git_status_file):
     parse_file(l, output_dir, "UnitShotIcon", "Original", "SPB")
     parse_file(l, output_dir, "UnitSquare", "AltCostume", "S")
     parse_file(l, output_dir, "UnitSquare", "Original", "S")
+    parse_file(l, output_dir, "ComicBackGround", "", "CBG")
